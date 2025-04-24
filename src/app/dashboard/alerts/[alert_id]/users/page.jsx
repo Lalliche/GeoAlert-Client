@@ -64,7 +64,7 @@ const headers = [
   },
 ];
 
-const rowStructure =  [
+const rowStructure = [
   {
     field: "name",
     width: "w-[20%]",
@@ -93,10 +93,10 @@ const rowStructure =  [
         <Link
           href={{
             pathname: `/dashboard/alerts/${row.alert_id}/users/${row.id}/location`,
-            query: { 
+            query: {
               lat: row.current_position.latitude,
-              lng: row.current_position.longitude
-            }
+              lng: row.current_position.longitude,
+            },
           }}
           className="px-[0.75em] py-[0.25em] box-shadow row gap-[0.5em] rounded-lg border border-transparent hover:border-black flex items-center"
         >
@@ -118,10 +118,10 @@ const rowStructure =  [
       const pathname = usePathname();
       return row.responseDetails ? (
         <Link
-        href={{
-          pathname: `/dashboard/alerts/${row.alert_id}/users/${row.id}/response`,
-          query: { classification: row.response }
-        }}
+          href={{
+            pathname: `/dashboard/alerts/${row.alert_id}/users/${row.id}/response`,
+            query: { classification: row.response },
+          }}
           className="px-[0.75em] py-[0.25em] box-shadow row gap-[0.5em] rounded-lg border border-transparent hover:scale-105 transition-all hover:border-black flex items-center"
         >
           <BsArrowsAngleExpand />
@@ -201,8 +201,8 @@ const rowData = [
       phone: "0556789012",
     },
     current_position: {
-      latitude: "34.885391",
-      longitude: "5.737184",
+      latitude: "36.00069",
+      longitude: "5.75",
     },
     response: "negative",
     responseDetails: {
@@ -253,10 +253,10 @@ const AlertDetailsPage = () => {
   const { alert_id } = useParams();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const enhancedRowData = rowData.map(row => ({
+  const enhancedRowData = rowData.map((row) => ({
     ...row,
     alert_id: alert_id,
-    response: row.response.toLowerCase() === "none" ? "None" : row.response
+    response: row.response.toLowerCase() === "none" ? "None" : row.response,
   }));
   useEffect(() => {
     if (alert_id) {
@@ -296,16 +296,16 @@ const AlertDetailsPage = () => {
         </div>
       ) : (
         <div className="flex flex-col  border-2 border-[#D0D5DD] rounded-lg p-4">
-         <DataTable
-  initialFontSize="12px"
-  headers={headers}
-  rowStructure={rowStructure}
-  rowData={enhancedRowData} 
-  onClickContent={[]}
-  rowClass={""}
-  TableClass={"!border-2 !border-transparent"}
-  TableText={"Alerts list"}
-/>
+          <DataTable
+            initialFontSize="12px"
+            headers={headers}
+            rowStructure={rowStructure}
+            rowData={enhancedRowData}
+            onClickContent={[]}
+            rowClass={""}
+            TableClass={"!border-2 !border-transparent"}
+            TableText={"Alerts list"}
+          />
         </div>
       )}
     </div>

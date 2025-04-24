@@ -36,7 +36,7 @@ const Page = () => {
   };
 
   const handleLogin = () => {
-    router.push("/dashboard");
+    router.push("/dashboard/overview");
   };
 
   return (
