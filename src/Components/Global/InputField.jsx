@@ -17,6 +17,7 @@ const InputField = ({
   onFocus,
   onBlur,
   displayHolder = true,
+  inputClassName = "",
 }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [isDelayedValid, setIsDelayedValid] = useState(true);
@@ -80,7 +81,7 @@ const InputField = ({
           value={value}
           type={showPassword ? "text" : inputType}
           placeholder={placeholder}
-          className={`input w-full outline-none ${
+          className={`input w-full outline-none ${inputClassName} ${
             isFocused ? "text-black" : "text-[#7A7A7A]"
           }`}
           onChange={onChange}
