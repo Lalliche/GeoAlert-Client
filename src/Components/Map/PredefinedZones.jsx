@@ -7,8 +7,8 @@ import { createRoot } from "react-dom/client";
 import "leaflet-draw";
 import "leaflet/dist/leaflet.css";
 import "leaflet-draw/dist/leaflet.draw.css";
+import { getAllZones } from "@/api/zonesApi";
 
-// Helper function to lighten the color
 const lightenColor = (hex, amount = 0.2) => {
   const num = parseInt(hex.slice(1), 16);
   const r = Math.min(
@@ -27,51 +27,51 @@ const lightenColor = (hex, amount = 0.2) => {
   return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
 };
 
-const PredefinedZones = ({ drawnItems, selectedZone, setSelectedZone }) => {
+const PredefinedZones = ({
+  drawnItems,
+  selectedZone,
+  setSelectedZone,
+  zoneCreatedFlag,
+}) => {
   const map = useMap();
 
-  // Predefined zones data
-  const predefinedZones = [
-    {
-      name: "Flood Zone",
-      riskLevel: "High",
-      lastChecked: "2025-04-23",
-      coordinates: [
-        [36.2, 2.8],
-        [36.6, 2.9],
-        [36.4, 4.0],
-      ],
-      type: "flood",
-      color: "#e11d48",
-      hasAlert: true,
-    },
-    {
-      name: "Fire Zone",
-      riskLevel: "High",
-      lastChecked: "2025-04-23",
-      coordinates: [
-        [35.3, 4.0],
-        [35.5, 3.2],
-        [35.9, 3.5],
-      ],
-      type: null,
-      color: "#f59e0b",
-      hasAlert: false,
-    },
-    {
-      name: "Earthquake Zone",
-      riskLevel: "Medium",
-      lastChecked: "2025-04-23",
-      coordinates: [
-        [37.1, 6.28],
-        [36.5, 7.7],
-        [36.2, 5.99],
-      ],
-      type: "earthquake",
-      color: "#31486CFF",
-      hasAlert: true,
-    },
-  ];
+  const [predefinedZones, setPredefinedZones] = useState([]);
+
+  useEffect(() => {
+    const fetchZones = async () => {
+      try {
+        const response = await getAllZones();
+        const zones = response.message; // <-- this is the actual array
+
+        console.log("Fetched zones:", zones);
+        console.log(
+          "Fetched zones length:",
+          zones[0].polygon?.geometry?.coordinates
+        );
+
+        const formattedZones = zones.map((zone) => ({
+          name: zone.name || "Unnamed Zone",
+          riskLevel: "---", // or derive if available
+          lastChecked: "--", // or replace with actual if available
+          coordinates:
+            zone.polygon?.geometry?.coordinates
+              ?.flat()
+              .map(([lng, lat]) => [lat, lng]) || [],
+
+          type: zone.type || null, // or hardcode if your API doesn't return it
+          color: "#31486CFF", // helper function below
+          hasAlert: zone.isActive, // adjust based on actual field
+        }));
+
+        console.log("Predefined zones formatted:", formattedZones);
+        setPredefinedZones(formattedZones);
+      } catch (error) {
+        console.error("Failed to fetch predefined zones:", error);
+      }
+    };
+
+    fetchZones();
+  }, [zoneCreatedFlag]);
 
   // Render the marker for each zone
   const renderMarker = (center, iconKey) => {
@@ -111,6 +111,7 @@ const PredefinedZones = ({ drawnItems, selectedZone, setSelectedZone }) => {
 
     const renderPredefinedZones = () => {
       predefinedZones.forEach((zone) => {
+        console.log("Rendering zone:", zone);
         const polygon = L.polygon(zone.coordinates, {
           color: zone.hasAlert ? zone.color : lightenColor(zone.color, 0.5),
           weight: 3,
@@ -152,7 +153,11 @@ const PredefinedZones = ({ drawnItems, selectedZone, setSelectedZone }) => {
           });
 
           if (!isDashed) {
-            setSelectedZone({ name: zone.name, polygon });
+            setSelectedZone({
+              name: zone.name,
+              hasAlert: zone.hasAlert,
+              polygon,
+            });
           } else {
             setSelectedZone(null);
           }
@@ -162,8 +167,7 @@ const PredefinedZones = ({ drawnItems, selectedZone, setSelectedZone }) => {
           `<div>
             <strong>Zone Credentials</strong><br />
             Name: ${zone.name}<br />
-            Risk Level: ${zone.riskLevel}<br />
-            Last Checked: ${zone.lastChecked}
+            ${zone.hasAlert ? "This zone has an alert!" : ""}<br />
           </div>`
         );
 
@@ -174,7 +178,7 @@ const PredefinedZones = ({ drawnItems, selectedZone, setSelectedZone }) => {
     };
 
     renderPredefinedZones();
-  }, [map, drawnItems, setSelectedZone]);
+  }, [map, drawnItems, setSelectedZone, predefinedZones]);
 
   return null;
 };
