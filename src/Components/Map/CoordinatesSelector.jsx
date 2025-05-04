@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { IoChevronForward } from "react-icons/io5";
 
-const CoordinatesSelector = () => {
+const CoordinatesSelector = ({ setCoordinates }) => {
+  // Accept the callback to send coordinates data
   const [showCoordinates, setShowCoordinates] = useState(false);
   const [coordinateRows, setCoordinateRows] = useState([
     ["", ""],
@@ -23,6 +24,24 @@ const CoordinatesSelector = () => {
     if (coordinateRows.length > 3) {
       setCoordinateRows(coordinateRows.slice(0, -1));
     }
+  };
+
+  const handleSubmitCoordinates = () => {
+    const validCoordinates = coordinateRows.filter(
+      (row) => row[0] !== "" && row[1] !== ""
+    );
+
+    if (validCoordinates.length < 3) {
+      alert("Please enter at least 3 coordinates.");
+      return;
+    }
+
+    const coordinates = validCoordinates.map((row) => ({
+      latitude: parseFloat(row[1]),
+      longitude: parseFloat(row[0]),
+    }));
+
+    setCoordinates(coordinates); // Send the coordinates to the parent
   };
 
   return (
@@ -86,6 +105,13 @@ const CoordinatesSelector = () => {
               -
             </button>
           </div>
+
+          <button
+            className="btn-primary p-[0.625em]"
+            onClick={handleSubmitCoordinates} // Submit coordinates on click
+          >
+            Confirm Coordinates
+          </button>
         </div>
       )}
     </div>
