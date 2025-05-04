@@ -9,6 +9,9 @@ import {
 import useField from "@/hooks/useField";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import submit from "@/lib/submit";
+import StatusMessage from "@/Components/Global/StatusMessage";
+import Spinner from "@/Components/Global/Spinner";
 
 const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 //const passwordPattern = /^(?=.*\d)(?=.*[A-Z])[A-Za-z\d]{8,30}$/;
@@ -28,6 +31,9 @@ const Page = () => {
   // Use `useField` for email input
   const emailField = useField("", (value) => emailPattern.test(value));
   const passwordField = useField("", (value) => passwordPattern.test(value));
+  const [err, setErr] = useState("");
+  const [success, setSuccess] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const [isChecked, setIsChecked] = useState(false);
 
@@ -36,11 +42,33 @@ const Page = () => {
   };
 
   const handleLogin = () => {
-    router.push("/dashboard/overview");
+    const email = emailField.value;
+    const password = passwordField.value;
+
+    if (emailField.isValid && passwordField.isValid) {
+      submit(email, password, setErr, setSuccess, setIsLoading, router);
+    } else {
+      setErr("Please fill in all required fields.");
+    }
   };
 
   return (
     <div className="page-row xxl:!text-[24px] lg:!text-[16px] md:!text-[12px] sm:!text-[10px] xs:!text-[8px] !text-[6px]">
+      <StatusMessage
+        isLoading={isLoading}
+        success={success}
+        error={err}
+        hideAlert={() => {
+          setErr("");
+          setSuccess("");
+        }}
+      />
+      {isLoading && (
+        <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center z-50 bg-white bg-opacity-50">
+          <Spinner />
+        </div>
+      )}
+
       <div className="page-col !w-1/2 px-[2.5em] relative overflow-hidden h-full gap-[1.5em] ">
         <Image
           src="/SignInImg.jpeg"
@@ -99,7 +127,7 @@ const Page = () => {
           <InputField
             label="Email"
             iconSrc={MdMailOutline}
-            placeholder="Entrez votre email"
+            placeholder="Enter your email"
             inputType="text"
             isValid={
               !emailField.isValid && emailField.value && !emailField.focus
@@ -108,7 +136,7 @@ const Page = () => {
             }
             onChange={(e) => emailField.setValue(e.target.value)}
             value={emailField.value}
-            errorMessage="S'il vous plaît, entrez une adresse email valide"
+            errorMessage="Please enter a valid email address"
             holderClassName=""
             containerClassName=" mb-[2em] "
             onFocus={() => emailField.setFocus(true)}
@@ -118,7 +146,7 @@ const Page = () => {
           <InputField
             label="Password"
             iconSrc={MdLockOutline}
-            placeholder="Entrez votre mot de passe"
+            placeholder="Enter your password"
             inputType="password"
             isValid={
               !passwordField.isValid &&
@@ -129,7 +157,7 @@ const Page = () => {
             }
             onChange={(e) => passwordField.setValue(e.target.value)}
             value={passwordField.value}
-            errorMessage="S'il vous plaît, entrez un mot de passe valide"
+            errorMessage="Please enter a valid password"
             holderClassName=""
             containerClassName=" mb-[2em] "
             onFocus={() => passwordField.setFocus(true)}
