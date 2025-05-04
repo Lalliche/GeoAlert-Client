@@ -1,38 +1,76 @@
 "use client";
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { FiArrowLeft } from 'react-icons/fi';
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { FiArrowLeft } from "react-icons/fi";
 import { IoSaveOutline } from "react-icons/io5";
-
 import { GrFormEdit } from "react-icons/gr";
-
+import StatusMessage from "@/Components/Global/StatusMessage";
+import { updateAlert } from "@/api/alertApi";
 
 export default function AlertMessagePage() {
-  const { id } = useParams();
+  const { alert_id } = useParams();
+  useEffect(() => {
+    console.log("id from params:", alert_id);
+  }, [alert_id]);
+
   const searchParams = useSearchParams();
   const router = useRouter();
-  const handleLogin = () => {
-    router.push("");
+
+  const initialMessage = searchParams.get("message") || "";
+  const [isEditing, setIsEditing] = useState(false);
+  const [message, setMessage] = useState(initialMessage);
+
+  const [err, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [info, setInfo] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSave = async () => {
+    if (message === initialMessage) {
+      setInfo("Nothing changed.");
+      setIsEditing(false);
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      await updateAlert(alert_id, { message });
+      setSuccess("Alert updated successfully!");
+      setIsEditing(false);
+    } catch (error) {
+      setError("Failed to update alert.");
+    } finally {
+      setIsLoading(false);
+    }
   };
-  
-  // Get the message from URL query parameters
-//   const message = searchParams.get('message');
 
   return (
     <div className="px-18 py-4 mx-auto">
-        
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-1 text-sm  pb-3 ">
-          <span>Alerts</span>
-          <span>/</span>
-          <span>Alerts list</span>
-          <span>/</span>
-          <span>Alert{id}</span>
-          <span>/</span>
-          <span>Message</span>
+      <StatusMessage
+        isLoading={isLoading}
+        success={success}
+        error={err}
+        info={info}
+        hideAlert={() => {
+          setError("");
+          setSuccess("");
+          setInfo("");
+        }}
+      />
+
+      {/* Breadcrumb */}
+      <div className="flex items-center gap-1 text-sm pb-3">
+        <span>Alerts</span>
+        <span>/</span>
+        <span>Alerts list</span>
+        <span>/</span>
+        <span>Alert{alert_id}</span>
+        <span>/</span>
+        <span>Message</span>
       </div>
 
- 
-      <button 
+      {/* Back button */}
+      <button
         onClick={() => router.back()}
         className="flex items-center gap-2 cursor-pointer pb-3"
       >
@@ -40,25 +78,43 @@ export default function AlertMessagePage() {
         <span>Back</span>
       </button>
 
-      {/* Message Content */}
+      {/* Message Card */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <h2 className="text-lg font-medium pb-5">Message</h2>
-        <div className="whitespace-pre-wrap break-words bg-[#C4C4C433] p-4 rounded-md text-[#7A7A7A] text-[12px]">
-          {" basdfljasdl;kfja;sldkfja;sldfja;slfjafsld;fkjas;lfjfaksd;lfjkfas;ldjfal;skjfla;ksdjf;kasjd;fljasd;fjasld;fjas;lkdfj;lsjdkasl;jfkasldjfa;klsdjfklasjfl;kajsklfd;jasklfjkasdjfk;l" || "No message content available"}
-        </div>
-        <div className='flex gap-2 w-full pt-5'>
-          <button onClick={handleLogin} className="btn-primary flex items-center justify-center gap-1 w-1/2">
-          <GrFormEdit size={22} className="text-white" /> 
-          <span className='text-sm font-medium'>Edit</span>
-          </button>
-        <button onClick={handleLogin} className="btn-primary !bg-white !text-black flex items-center justify-center gap-2 w-1/2 py-2 hover:bg-gray-50 transition-colors  shadow-[0_2px_8px_rgba(0,0,0,0.1)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.15)]">
-        <IoSaveOutline  className="text-black" />
-    <span className='text-sm font-medium'>Save</span>
 
-          </button> 
+        {!isEditing ? (
+          <div className="whitespace-pre-wrap break-words bg-[#C4C4C433] p-4 rounded-md text-[#7A7A7A] text-[12px]">
+            {message || "No message content available"}
+          </div>
+        ) : (
+          <textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            rows={5}
+            className="w-full border border-gray-300 rounded-md p-2 text-sm bg-[#F7F7F7]"
+          />
+        )}
+
+        <div className={`pt-5 ${isEditing ? "flex flex-col gap-3" : ""}`}>
+          {!isEditing ? (
+            <button
+              onClick={() => setIsEditing(true)}
+              className="btn-primary flex items-center justify-center gap-1 w-full"
+            >
+              <GrFormEdit size={22} className="text-white" />
+              <span className="text-sm font-medium">Edit</span>
+            </button>
+          ) : (
+            <button
+              onClick={handleSave}
+              className="btn-primary flex items-center justify-center gap-2 w-full py-2 hover:bg-gray-50 transition-colors shadow-[0_2px_8px_rgba(0,0,0,0.1)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.15)]"
+            >
+              <IoSaveOutline className="text-white" />
+              <span className="text-sm font-medium text-white  ">Save</span>
+            </button>
+          )}
         </div>
       </div>
-
     </div>
   );
 }
