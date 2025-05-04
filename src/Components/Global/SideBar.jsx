@@ -27,6 +27,7 @@ const AdminRoutes = [
     Icon: FiUsers,
     path: "/dashboard/users",
     pathName: "Users",
+    isPartialMatch: true,
   },
   {
     name: "Zones Management",
