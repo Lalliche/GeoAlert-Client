@@ -6,8 +6,6 @@ import { createRoot } from "react-dom/client";
 import { ImCancelCircle } from "react-icons/im";
 import { FaMapMarkerAlt } from "react-icons/fa";
 import PresetCitySelector from "./PresetCitySelector";
-import ColorPicker from "./ColorPicker";
-import IconSelector from "./IconSelector";
 import DrawButtons from "./DrawButtons";
 import DeleteZonePopup from "./DeleteZonePopup";
 import { MdFlood, MdDone, MdOutlineAbc } from "react-icons/md";
@@ -19,6 +17,10 @@ import { FiArrowLeft } from "react-icons/fi";
 import { FaChevronUp, FaChevronDown } from "react-icons/fa";
 import CoordinatesSelector from "./CoordinatesSelector";
 import { TbPlaceholder } from "react-icons/tb";
+import { addZone } from "@/api/zonesApi";
+import InputField from "@/Components/Global/InputField";
+import useField from "@/hooks/useField";
+import StatusMessage from "@/Components/Global/StatusMessage";
 
 const iconComponents = {
   default: FaMapMarkerAlt,
@@ -68,7 +70,101 @@ const TimeSelectorButton = () => {
   );
 };
 
-const ZoneCreationToolbar = ({ onBack, drawnItems }) => {
+const SecondStep = ({ setStep, onBack, zone, onZoneCreated }) => {
+  const namePattern = /^[a-zA-Z0-9_\-\s]+$/;
+  const zoneName = useField("", (value) => namePattern.test(value));
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(null);
+
+  const onDone = async () => {
+    if (zoneName.isValid && zoneName.value.trim() !== "") {
+      const zoneData = {
+        name: zoneName.value,
+        coordinates: zone,
+      };
+
+      try {
+        setLoading(true);
+        const response = await addZone(zoneData.name, zoneData.coordinates);
+        console.log("Zone added successfully:", response);
+        setSuccess("Zone added successfully!");
+        onZoneCreated();
+        onBack();
+      } catch (error) {
+        console.error("Failed to add zone:", error);
+        setError("Failed to add zone. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      setError("Please fill in a valid zone name.");
+    }
+  };
+
+  return (
+    <div className="absolute w-[25%] center top-4 right-0 z-[1000] bg-[rgba(255,255,255,0.9)] p-4 rounded-lg shadow-md flex flex-col gap-[1.5em] font-space-grotesk">
+      <StatusMessage
+        error={error}
+        isLoading={loading}
+        success={success}
+        hideAlert={() => {
+          setError(null);
+          setSuccess(null);
+        }}
+      />
+      <button
+        onClick={() => {
+          setStep(1);
+        }}
+        className="w-full justify-items-start cursor-pointer"
+      >
+        <FiArrowLeft className="text-[1.5em]" />
+      </button>
+
+      <p className="text-sm whitespace-normal">
+        Finish by <span className="font-semibold">naming your zone</span>
+      </p>
+
+      <div className="relative w-full">
+        <InputField
+          label=""
+          iconSrc={MdOutlineAbc}
+          placeholder="Enter zone name"
+          inputType="text"
+          isValid={
+            !zoneName.isValid && zoneName.value && !zoneName.focus
+              ? false
+              : true
+          }
+          onChange={(e) => {
+            zoneName.setValue(e.target.value);
+            setError(null); // clear error on typing
+          }}
+          value={zoneName.value}
+          errorMessage="Please enter a valid zone name"
+          holderClassName=""
+          containerClassName=" mb-[2em]"
+          inputClassName="!p-[0.625em]"
+          onFocus={() => zoneName.setFocus(true)}
+          onBlur={() => zoneName.setFocus(false)}
+        />
+      </div>
+
+      <button
+        className="btn-primary row gap-2 w-full !py-[1em]"
+        onClick={onDone}
+      >
+        <MdDone className="text-[1.5em]" />
+        <span className="font-semibold">Done</span>
+      </button>
+
+      <p className="w-full center">2/2</p>
+    </div>
+  );
+};
+
+const ZoneCreationToolbar = ({ onBack, drawnItems, onZoneCreated }) => {
   const map = useMap();
   const selectedZoneRef = useRef(null);
   const [selectedZoneName, setSelectedZoneName] = useState(null);
@@ -80,6 +176,10 @@ const ZoneCreationToolbar = ({ onBack, drawnItems }) => {
   const [selectedPresetLayer, setSelectedPresetLayer] = useState(null);
   const [selectedPresetMarker, setSelectedPresetMarker] = useState(null);
   const [selectedCity, setSelectedCity] = useState(null);
+  const [createdZoneName, setCreatedZoneName] = useState("");
+  const [createdZone, setCreatedZone] = useState(null);
+  const [createdLayers, setCreatedLayers] = useState([]);
+  const [lastCreatedLayer, setLastCreatedLayer] = useState(null);
 
   const drawControlRef = useRef(null);
 
@@ -142,11 +242,13 @@ const ZoneCreationToolbar = ({ onBack, drawnItems }) => {
       const layer = e.layer;
       drawnItems.addLayer(layer);
 
+      console.log("Zone created:", layer);
+
       layer.bindPopup(
         `<div>
             <strong>Zone Credentials</strong><br />
             Name: Custom Zone<br />
-            Risk Level: Unknown<br />
+            
             Last Checked: ${new Date().toISOString().split("T")[0]}
           </div>`
       );
@@ -166,6 +268,8 @@ const ZoneCreationToolbar = ({ onBack, drawnItems }) => {
         setSelectedZoneName(isDashed ? null : "Custom Zone");
         setShowDeletePopup(!isDashed);
       });
+      setCreatedLayers((prev) => [...prev, layer]);
+      setLastCreatedLayer(layer);
       setActiveTool(null);
     };
 
@@ -185,19 +289,108 @@ const ZoneCreationToolbar = ({ onBack, drawnItems }) => {
     };
   }, [activeTool]);
 
+  useEffect(() => {
+    console.log("created layers are:", createdLayers);
+  }, [createdLayers]);
+
+  useEffect(() => {
+    console.log("last created is:", lastCreatedLayer);
+  }, [lastCreatedLayer]);
+
   const [step, setStep] = useState(1);
+
+  useEffect(() => {
+    console.log("step is:", step);
+  }, [step]);
+
+  useEffect(() => {
+    console.log("selected city is:", selectedCity);
+  }, [selectedCity]);
+
+  //coordinates selector
+
+  const [coordinates, setCoordinates] = useState(null);
+
+  useEffect(() => {
+    console.log("coordinates are:", coordinates);
+    if (coordinates && activeTool !== "coordinates") {
+      // If coordinates are set and no other tool is active, we can handle the zone creation based on coordinates
+      const latLngs = coordinates.map((coord) => [
+        coord.latitude,
+        coord.longitude,
+      ]);
+      const polygon = L.polygon(latLngs, { color: "#3388ff" }).addTo(map);
+      drawnItems.addLayer(polygon);
+      setStep(2); // Move to the next step after creating the polygon
+    }
+  }, [coordinates]);
+
+  //handle zone creation
+
+  const clickNext = () => {
+    // Check if exactly one of the states is populated
+    const hasCreatedLayer =
+      lastCreatedLayer &&
+      lastCreatedLayer._latlngs &&
+      lastCreatedLayer._latlngs.length > 0;
+    const hasCoordinates = coordinates && coordinates.length > 0;
+    const hasSelectedCity =
+      selectedCity &&
+      selectedCity.coordinates &&
+      selectedCity.coordinates.length > 0;
+
+    // If none or more than one state is populated, show an error or return
+    if (hasCreatedLayer + hasCoordinates + hasSelectedCity !== 1) {
+      alert(
+        "Please ensure exactly one option is selected (LastCreatedLayer, Coordinates, or SelectedCity)."
+      );
+      return;
+    }
+
+    let zoneCoordinates = [];
+
+    // Handle each case:
+    if (hasCreatedLayer) {
+      // Extract coordinates from the LastCreatedLayer
+      zoneCoordinates = lastCreatedLayer._latlngs[0].map((latLng) => ({
+        latitude: latLng.lat,
+        longitude: latLng.lng,
+      }));
+    } else if (hasCoordinates) {
+      // Use the provided coordinates
+      zoneCoordinates = coordinates.map((coord) => ({
+        latitude: coord[0],
+        longitude: coord[1],
+      }));
+    } else if (hasSelectedCity) {
+      // Use the selected city's coordinates
+      zoneCoordinates = selectedCity.coordinates.map((coord) => ({
+        latitude: coord[0],
+        longitude: coord[1],
+      }));
+    }
+
+    // Store the zone coordinates in createdZone state
+    setCreatedZone(zoneCoordinates);
+
+    // Proceed to the next step
+    setStep(2);
+  };
+
+  useEffect(() => {
+    console.log("created zone is:", createdZone);
+    console.log("created zone name is:", createdZoneName);
+  }, [createdZone, createdZoneName]);
 
   return (
     <>
       {step === 1 && (
         <div className="absolute w-[25%] center top-4 right-0 z-[1000] bg-[rgba(255,255,255,0.9)] p-4 rounded-lg shadow-md flex flex-col gap-[1em] font-space-grotesk">
-          <p className="w-full center">1/3</p>
           <button
             onClick={onBack}
-            className="btn-primary w-full !p-2 row gap-[0.5em] !bg-white !text-txt btn-shadow "
+            className="w-full justify-items-start cursor-pointer "
           >
             <ImCancelCircle className="text-[1.5em]" />
-            <span className="font-semibold">Cancel</span>
           </button>
 
           <p className="text-sm whitespace-normal">
@@ -221,7 +414,7 @@ const ZoneCreationToolbar = ({ onBack, drawnItems }) => {
               selectedCity={selectedCity}
               setSelectedCity={setSelectedCity}
             />
-            <CoordinatesSelector />
+            <CoordinatesSelector setCoordinates={setCoordinates} />
             <DrawButtons activeTool={activeTool} enableTool={enableTool} />
           </div>
 
@@ -238,84 +431,24 @@ const ZoneCreationToolbar = ({ onBack, drawnItems }) => {
           <button
             className="btn-primary row gap-2 w-full !py-[1em]"
             onClick={() => {
-              setStep(2);
+              clickNext();
             }}
           >
             <FaArrowRight className="text-[1.5em]" />
             <span className="font-semibold">Next</span>
           </button>
+          <p className="w-full center">1/2</p>
         </div>
       )}
 
+      {/*  {step === 2 && <SecondStep setStep={setStep} />} */}
       {step === 2 && (
-        <div className="absolute w-[25%] center top-4 right-0 z-[1000] bg-[rgba(255,255,255,0.9)] p-4 rounded-lg shadow-md flex flex-col gap-[1em] font-space-grotesk">
-          <p className="w-full center">2/3</p>
-          <button
-            onClick={
-              () => {
-                setStep(1);
-              } /* Reset the state when going back */
-            }
-            className="btn-primary w-full !p-2 row gap-[0.5em] !bg-white !text-txt btn-shadow "
-          >
-            <FiArrowLeft className="text-[1.5em]" />
-            <span className="font-semibold">Go back</span>
-          </button>
-
-          <p className="text-sm whitespace-normal">
-            Add a <span className="font-semibold">warning outline</span> to
-            alert people in zone
-          </p>
-
-          <TimeSelectorButton />
-
-          <button
-            className="btn-primary row gap-2 w-full !py-[1em]"
-            onClick={() => {
-              setStep(3);
-            }}
-          >
-            <FaArrowRight className="text-[1.5em]" />
-            <span className="font-semibold">Next</span>
-          </button>
-        </div>
-      )}
-      {step === 3 && (
-        <div className="absolute w-[25%] center top-4 right-0 z-[1000] bg-[rgba(255,255,255,0.9)] p-4 rounded-lg shadow-md flex flex-col gap-[1em] font-space-grotesk">
-          <p className="w-full center">3/3</p>
-          <button
-            onClick={() => {
-              setStep(2);
-            }}
-            className="btn-primary w-full !p-2 row gap-[0.5em] !bg-white !text-txt btn-shadow "
-          >
-            <FiArrowLeft className="text-[1.5em]" />
-            <span className="font-semibold">Go back</span>
-          </button>
-
-          <p className="text-sm whitespace-normal">
-            Finish by <span className="font-semibold">naming your zone</span>
-          </p>
-
-          <div className="relative w-full">
-            <input
-              type="text"
-              placeholder="Zone name"
-              className="w-full text-txt font-semibold p-4 pr-10 rounded-lg btn-shadow focus:outline-none transition-all duration-200"
-            />
-            <MdOutlineAbc className="absolute right-3 top-1/2 -translate-y-1/2 text-[2em] text-gray-500" />
-          </div>
-
-          <button
-            className="btn-primary row gap-2 w-full !py-[1em]"
-            onClick={() => {
-              onBack();
-            }}
-          >
-            <MdDone className="text-[1.5em]" />
-            <span className="font-semibold">Done</span>
-          </button>
-        </div>
+        <SecondStep
+          setStep={setStep}
+          onBack={onBack}
+          zone={createdZone}
+          onZoneCreated={onZoneCreated}
+        />
       )}
     </>
   );
