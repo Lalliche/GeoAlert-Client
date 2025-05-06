@@ -1,13 +1,16 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import DataTable from "@/Components/Table/DataTable";
+import { Filter } from "@/Components/Table/Filter";
 import { BsArrowsAngleExpand } from "react-icons/bs";
 import { FiUsers } from "react-icons/fi";
 import Link from "next/link";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
-import { getAlerts } from "@/api/alertApi";
+import { getAlerts, deleteAlert } from "@/api/alertApi";
 import Spinner from "@/Components/Global/Spinner";
+import { MdOutlineEdit, MdOutlineDeleteOutline } from "react-icons/md";
+import StatusMessage from "@/Components/Global/StatusMessage";
 
 const formatDate = (date) => {
   const dateObj = new Date(date);
@@ -33,25 +36,6 @@ const getTypeContent = (value) => {
         }`}
       ></div>
       <p className="text-txt capitalize">{value}</p>
-    </div>
-  );
-};
-
-const getPercentageContent = (value) => {
-  return (
-    <div className="flex items-center gap-[0.5em]">
-      <p className="text-txt">{value}</p>
-      <div className="w-[1.5em] h-[1.5em]">
-        <CircularProgressbar
-          value={value}
-          text={""}
-          strokeWidth={15}
-          styles={buildStyles({
-            pathColor: "#3CB54B",
-            trailColor: "#CFF4D2",
-          })}
-        />
-      </div>
     </div>
   );
 };
@@ -152,10 +136,58 @@ const rowStructure = [
   },
 ];
 
+const AlertModification = ({ data, setClicked, refresh, err, success }) => {
+  const handleDeleteButtonClick = async () => {
+    console.log("Delete button clicked for alert ID:", data.id);
+    try {
+      const result = await deleteAlert(data.id);
+      setClicked(null); // Close the details view after deletion
+      refresh((prev) => !prev); // Trigger a refresh to update the alert list
+      success(`Alert ${data.name} deleted successfully`);
+    } catch (error) {
+      console.error("Failed to delete alert:", error);
+      err(`Failed to delete alert ${data.name} `);
+    }
+  };
+
+  const handleEditButtonClick = () => {
+    console.log("Edit button clicked for alert ID:", data.id);
+  };
+
+  return (
+    <div className="relative col bg-[#F9FAFB] border-2 border-[#D0D5DD] rounded-lg p-4 gap-[1em]">
+      <p className="text-txt font-semibold text-[1.2em]">{data?.name}</p>
+
+      <div className="flex flex-row w-full gap-[1em]">
+        <button
+          onClick={handleEditButtonClick}
+          className="btn-primary btn-shadow !text-txt !bg-white hover:scale-[1.02] flex items-center justify-center gap-1 w-full transition-all duration-300 ease-in-out "
+        >
+          <MdOutlineEdit className="text-[1.5em]" />
+          Edit
+        </button>
+        <button
+          onClick={handleDeleteButtonClick}
+          className="btn-primary btn-shadow  flex items-center  justify-center gap-1 w-full hover:scale-[1.02] transition-all duration-300 ease-in-out "
+        >
+          <MdOutlineDeleteOutline className="text-[1.5em]" />
+          Delete
+        </button>
+      </div>
+    </div>
+  );
+};
+
 export default function Home() {
-  const [alerts, setAlerts] = useState([]);
+  const [allAlerts, setAllAlerts] = useState([]); // stores raw formatted data
+  const [alerts, setAlerts] = useState([]); // filtered view
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
+  const [clickedRow, setClickedRow] = useState(null);
+  const [status, setStatus] = useState("");
+  const [refresh, setRefresh] = useState(false);
+  const [err, setErr] = useState(null);
+  const [success, setSuccess] = useState(null);
 
   useEffect(() => {
     const fetchAlerts = async () => {
@@ -177,22 +209,44 @@ export default function Home() {
             msg: item.message,
           },
           imp: Math.floor(Math.random() * 100), // Placeholder
+          isExpired: item.isExpired, // ✅ use this for filtering
         }));
 
-        setAlerts(formatted);
+        setAllAlerts(formatted);
       } catch (error) {
         console.error(error);
         setFetchError("Failed to fetch alerts.");
+        setErr("Failed to fetch alerts.");
       } finally {
         setLoading(false);
       }
     };
 
     fetchAlerts();
-  }, []);
+  }, [refresh]);
+
+  useEffect(() => {
+    // filter when status or allAlerts change
+    if (status === "Active") {
+      setAlerts(allAlerts.filter((alert) => !alert.isExpired));
+    } else if (status === "Expired") {
+      setAlerts(allAlerts.filter((alert) => alert.isExpired));
+    } else {
+      setAlerts(allAlerts); // "All"
+    }
+  }, [status, allAlerts]);
 
   return (
-    <div className="flex flex-col p-4 w-full">
+    <div className="flex flex-col p-4 w-full ">
+      <StatusMessage
+        error={err}
+        success={success}
+        isLoading={loading}
+        hideAlert={() => {
+          setErr(null);
+          setSuccess(null);
+        }}
+      />
       {loading ? (
         <div className="center w-full h-[60vh]">
           <Spinner />
@@ -200,17 +254,30 @@ export default function Home() {
       ) : fetchError ? (
         <p className="text-red-500">{fetchError}</p>
       ) : (
-        <div className="flex flex-col border-2 border-[#D0D5DD] rounded-lg p-4">
-          <DataTable
-            initialFontSize="12px"
-            headers={headers}
-            rowStructure={rowStructure}
-            rowData={alerts}
-            onClickContent={[]}
-            rowClass={""}
-            TableClass={"!border-2 !border-transparent"}
-            TableText={"Alerts list"}
-          />
+        <div className="flex flex-col gap-[1em] w-full">
+          <Filter Status={setStatus} />
+          <div className="flex flex-col border-2 border-[#D0D5DD] rounded-lg p-4">
+            <DataTable
+              initialFontSize="12px"
+              headers={headers}
+              rowStructure={rowStructure}
+              rowData={alerts}
+              onClickContent={[]}
+              rowClass={""}
+              TableClass={"!border-2 !border-transparent"}
+              TableText={"Alerts list"}
+              onClickRow={setClickedRow}
+            />
+          </div>
+          {clickedRow && (
+            <AlertModification
+              data={clickedRow}
+              refresh={setRefresh}
+              setClicked={setClickedRow}
+              err={setErr}
+              success={setSuccess}
+            />
+          )}
         </div>
       )}
     </div>

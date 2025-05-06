@@ -1,5 +1,5 @@
 "use client";
-import React, { use, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { MapContainer, TileLayer, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -16,7 +16,13 @@ import { addAlert } from "@/api/alertApi";
 import { deleteZone } from "@/api/zonesApi";
 import StatusMessage from "@/Components/Global/StatusMessage";
 
-const AssigningAlert = ({ setAssignAlert, selectedZone }) => {
+const AssigningAlert = ({
+  setAssignAlert,
+  selectedZone,
+  setError,
+  setSuccess,
+  setLoading,
+}) => {
   const namePattern = /^[a-zA-Z0-9_\-\s]+$/;
   const alertName = useField("", (value) => namePattern.test(value));
   const [startDate, setStartDate] = useState("");
@@ -29,7 +35,8 @@ const AssigningAlert = ({ setAssignAlert, selectedZone }) => {
     sms: false,
     email: false,
   });
-  const [error, setError] = useState(null);
+
+  const [error, setTheError] = useState(null);
 
   const handleSubmit = async () => {
     if (
@@ -44,11 +51,13 @@ const AssigningAlert = ({ setAssignAlert, selectedZone }) => {
       !severity ||
       !type
     ) {
-      setError("Please insert all fields correctly.");
+      setTheError("Please insert all fields correctly.");
       return;
     }
 
     try {
+      setLoading(true);
+
       await addAlert({
         alertTitle: alertName.value,
         notification_type: "APP-Notification",
@@ -60,12 +69,15 @@ const AssigningAlert = ({ setAssignAlert, selectedZone }) => {
         type: type.toLowerCase(),
         ZoneSelected: selectedZone.name,
       });
+      setSuccess("Alert successfully created");
 
       console.log("Alert successfully created");
       setAssignAlert(false);
     } catch (error) {
       console.error("Failed to create alert:", error);
       setError("Failed to create alert. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -371,6 +383,13 @@ const DrawMap = () => {
 
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (success === "Alert successfully created") {
+      notifyZoneCreated();
+    }
+  }, [success]);
 
   const handleDeleteZone = async () => {
     if (!selectedZone?.name) {
@@ -379,6 +398,7 @@ const DrawMap = () => {
     }
 
     try {
+      setLoading(true);
       setError(null); // Clear previous errors
       const response = await deleteZone(selectedZone.name);
       console.log("Zone deleted successfully:", response);
@@ -389,6 +409,7 @@ const DrawMap = () => {
       setSuccess(null);
     } finally {
       setSelectedZone(null);
+      setLoading(false);
     }
   };
 
@@ -397,6 +418,7 @@ const DrawMap = () => {
       <StatusMessage
         error={error}
         success={success}
+        isLoading={loading}
         hideAlert={() => {
           setError(null);
           setSuccess(null);
@@ -439,6 +461,9 @@ const DrawMap = () => {
             <AssigningAlert
               setAssignAlert={setAssignAlert}
               selectedZone={selectedZone}
+              setError={setError}
+              setSuccess={setSuccess}
+              setLoading={setLoading}
             />
           )}
 

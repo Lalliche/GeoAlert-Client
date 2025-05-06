@@ -2,6 +2,8 @@
 import axios from "./alertBase";
 import Cookies from "js-cookie";
 
+const accessToken = Cookies.get("access");
+
 export const addAlert = async ({
   alertTitle,
   notification_type,
@@ -26,8 +28,6 @@ export const addAlert = async ({
   });
 
   try {
-    const accessToken = Cookies.get("access");
-
     const response = await axios.post(
       "/AddAlert",
       {
@@ -58,8 +58,6 @@ export const addAlert = async ({
 
 export const getAlerts = async () => {
   try {
-    const accessToken = Cookies.get("access"); // ⬅️ Get the token from cookies
-
     const response = await axios.get(
       "/AllAlerts",
 
@@ -82,9 +80,8 @@ export const getAlerts = async () => {
   }
 };
 
-export const updateAlert = async (id, updatedData) => {
+export const updateAlert = async ({ id, updatedData }) => {
   try {
-    const accessToken = Cookies.get("access");
     console.log("Updating alert with ID:", id, "and data:", updatedData); // ⬅️ Debugging line
 
     const response = await axios.patch(`/updateAlert/${id}`, updatedData, {
@@ -99,6 +96,29 @@ export const updateAlert = async (id, updatedData) => {
   } catch (error) {
     console.error(
       "Error updating alert:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
+
+export const deleteAlert = async (id) => {
+  try {
+    console.log("Deleting alert with ID:", id);
+
+    const response = await axios.delete("/deleteAlert", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      data: { id }, // ⬅️ 'data' is how axios sends body with DELETE
+    });
+
+    console.log("Alert deleted:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error deleting alert:",
       error.response?.data || error.message
     );
     throw error;

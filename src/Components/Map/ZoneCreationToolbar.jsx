@@ -328,6 +328,9 @@ const ZoneCreationToolbar = ({ onBack, drawnItems, onZoneCreated }) => {
   //handle zone creation
 
   const clickNext = () => {
+    console.log("hascreated layer is:", lastCreatedLayer);
+    console.log("hascoordinates is:", coordinates);
+    console.log("hasselected city is:", selectedCity);
     // Check if exactly one of the states is populated
     const hasCreatedLayer =
       lastCreatedLayer &&

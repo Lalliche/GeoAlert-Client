@@ -94,6 +94,29 @@ export const getAllZones = async () => {
   }
 };
 
+export const getWilayaByName = async (wilayaName) => {
+  try {
+    const accessToken = Cookies.get("access");
+
+    const response = await axios.get(
+      `/wilaya/${encodeURIComponent(wilayaName)}`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    console.log("Wilaya data debug:", response.data); // Debugging line
+
+    return response.data; // returns the wilaya data
+  } catch (error) {
+    console.error(`Error fetching wilaya '${wilayaName}':`, error);
+    throw error;
+  }
+};
+
 export const getUserTracking = async (id, duration) => {
   console.log(
     "Fetching tracking data for user:",

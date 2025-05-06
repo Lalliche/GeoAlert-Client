@@ -162,7 +162,7 @@ const UsersPage = () => {
       ) : (
         <>
           {/* Duration Select */}
-          <div className="flex flex-col gap-2 w-[200px]">
+          <div className="flex flex-col gap-2 w-fit ">
             <label className="text-sm font-semibold">Position Duration</label>
             <select
               value={positionDuration}

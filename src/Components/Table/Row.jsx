@@ -8,9 +8,18 @@ const Row = ({
   handleRowClick,
   onClickContent,
   rowClass,
+  setClickedRow = null,
 }) => {
   const handleClick = () => {
-    handleRowClick(data.id);
+    if (clickedRowId === data.id) {
+      // Row is already selected, so deselect it
+      handleRowClick(null);
+      setClickedRow(null);
+    } else {
+      // Select the new row
+      handleRowClick(data.id);
+      setClickedRow(data);
+    }
   };
 
   return (
@@ -18,7 +27,7 @@ const Row = ({
       <div
         className={`flex flex-row items-center gap-[0.5em] w-full  border-[#EAECF0] py-4 px-4 hover:bg-[#F9FAFB] cursor-pointer
           ${rowClass}
-          ${clickedRowId === data.id ? "bg-[#F9FAFB]" : "bg-white border-b-2"}
+          ${clickedRowId === data.id ? "bg-[#f0f1f1]" : "bg-white border-b-2"}
           `}
         onClick={handleClick}
       >

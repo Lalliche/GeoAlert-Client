@@ -46,12 +46,14 @@ const DataTable = ({
   TableClass,
   TableText,
   initialFontSize = "16px",
+  onClickRow = null,
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState(null);
   const [sortDirection, setSortDirection] = useState("asc");
   const [currentPage, setCurrentPage] = useState(1);
   const [clickedRowId, setClickedRowId] = useState(null);
+
   const rowsPerPage = 5;
 
   const handleClick = (id) => {
@@ -156,6 +158,7 @@ const DataTable = ({
               handleRowClick={handleRowClick}
               onClickContent={onClickContent}
               rowClass={rowClass}
+              setClickedRow={onClickRow}
             />
           ))}
         </div>
