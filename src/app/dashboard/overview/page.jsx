@@ -1,41 +1,110 @@
 "use client";
-import React from "react";
-import { addZone } from "@/api/zonesApi"; // ⬅️ Import your addZone function (adjust the path if needed)
+import { useEffect, useState } from "react";
+import { getFrequency, updateFrequency } from "@/api/zonesApi";
 
-const Page = () => {
-  const handleTestAddZone = async () => {
-    const testZone = {
-      name: "Zone huirhrhro",
-      coordinates: [
-        { latitude: 35.958, longitude: -0.823975 },
-        { latitude: 35.117662, longitude: -2.208252 },
-        { latitude: 31.407568, longitude: 1.505127 },
-        { latitude: 35.315125, longitude: 3.218994 },
-        { latitude: 36.489765, longitude: 1.307373 },
-      ],
-    };
+const OverviewPage = () => {
+  const [loading, setLoading] = useState(true);
+  const [zoneFreq, setZoneFreq] = useState("");
+  const [positionFreq, setPositionFreq] = useState("");
+  const [hasZone, setHasZone] = useState(false);
+  const [hasPosition, setHasPosition] = useState(false);
+  const [updating, setUpdating] = useState(false);
+  const [success, setSuccess] = useState(null);
+  const [error, setError] = useState(null);
 
+  const fetchFrequencies = async () => {
     try {
-      const response = await addZone(testZone.name, testZone.coordinates);
-      console.log("Zone added successfully:", response);
-      alert("Zone added successfully!");
-    } catch (error) {
-      console.error("Failed to add zone:", error);
-      alert("Failed to add zone.");
+      const zoneData = await getFrequency();
+      console.log("Zone data:", zoneData);
+
+      const zoneItem = zoneData.find((item) => item.name === "zone_fetch");
+      const positionItem = zoneData.find(
+        (item) => item.name === "position_fetch"
+      );
+
+      if (zoneItem) {
+        setZoneFreq(zoneItem.frequency);
+        setHasZone(true);
+      }
+      if (positionItem) {
+        setPositionFreq(positionItem.frequency);
+        setHasPosition(true);
+      }
+    } catch (err) {
+      setError("Failed to fetch frequencies.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchFrequencies();
+  }, []);
+
+  const handleUpdate = async (name, frequency) => {
+    try {
+      setUpdating(true);
+      await updateFrequency(name, parseInt(frequency));
+      setSuccess(`Successfully updated ${name} frequency.`);
+    } catch (err) {
+      setError(`Failed to update ${name} frequency.`);
+    } finally {
+      setUpdating(false);
+      setTimeout(() => {
+        setSuccess(null);
+        setError(null);
+      }, 3000);
     }
   };
 
   return (
-    <div className="p-4">
-      <h1 className="text-xl mb-4">Overview Page</h1>
-      <button
-        onClick={handleTestAddZone}
-        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-      >
-        Add Test Zone
-      </button>
+    <div className="p-6">
+      {loading ? (
+        <p>Loading frequencies...</p>
+      ) : (
+        <div className="space-y-6">
+          {success && <p className="text-green-600 font-semibold">{success}</p>}
+          {error && <p className="text-red-600 font-semibold">{error}</p>}
+
+          {/* Zone Fetch */}
+          <div className="flex items-center gap-4">
+            <label className="w-40 font-semibold">Zone Fetch (sec):</label>
+            <input
+              type="text"
+              value={zoneFreq}
+              onChange={(e) => setZoneFreq(e.target.value)}
+              className="border rounded px-3 py-2 w-32"
+              placeholder="Enter value"
+            />
+            <button
+              onClick={() => handleUpdate("zone_fetch", zoneFreq)}
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+            >
+              {hasZone ? "Update" : "Add"}
+            </button>
+          </div>
+
+          {/* Position Fetch */}
+          <div className="flex items-center gap-4">
+            <label className="w-40 font-semibold">Position Fetch (sec):</label>
+            <input
+              type="text"
+              value={positionFreq}
+              onChange={(e) => setPositionFreq(e.target.value)}
+              className="border rounded px-3 py-2 w-32"
+              placeholder="Enter value"
+            />
+            <button
+              onClick={() => handleUpdate("position_fetch", positionFreq)}
+              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
+            >
+              {hasPosition ? "Update" : "Add"}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-export default Page;
+export default OverviewPage;
