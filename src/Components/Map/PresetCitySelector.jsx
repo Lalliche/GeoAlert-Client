@@ -91,6 +91,9 @@ const PresetCitySelector = ({
         coord?.longitude,
       ]);
 
+      console.log("city is ", city);
+      console.log("polygonCoords is ", polygonCoords);
+
       const polygon = L.polygon(polygonCoords, { color }).addTo(drawnItems);
       polygon.bindPopup(`<strong>${city.name}</strong> - Preset zone`);
 
