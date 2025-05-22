@@ -7,14 +7,16 @@ import { IoArrowBackOutline } from "react-icons/io5";
 import { BsArrowsAngleExpand } from "react-icons/bs";
 import { GrContactInfo } from "react-icons/gr";
 import { TfiLocationPin } from "react-icons/tfi";
+import StatusMessage from "@/Components/Global/StatusMessage";
+import { impactedUsers } from "@/api/notificationApi";
 
 import Link from "next/link";
 import DataTable from "@/Components/Table/DataTable";
 
 const getTypeContent = (value) => {
   const colors = {
-    positive: "bg-[#3CB54B]",
-    negative: "bg-[#DC091A]",
+    Replied: "bg-[#3CB54B]",
+
     None: "bg-white",
   };
 
@@ -134,144 +136,99 @@ const rowStructure = [
   },
 ];
 
-//  Expected Date format
-
-const rowData = [
-  {
-    id: 1,
-    alert_id: 10,
-    name: "Sofia Karim",
-    contact: {
-      email: "s.k@gmail.com",
-      phone: "0555555555",
-    },
-    current_position: {
-      latitude: "36.752887",
-      longitude: "3.042048",
-    },
-    response: "negative",
-    responseDetails: {
-      date: "2025-03-05",
-      time: "12:00",
-      type: "vocale",
-      content: "I'm safe",
-    },
-  },
-  {
-    id: 2,
-    alert_id: 11,
-    name: "Yacine Bensalem",
-    contact: {
-      email: "y.bensalem@gmail.com",
-      phone: "0666123456",
-    },
-    current_position: {
-      latitude: "35.696947",
-      longitude: "-0.630813",
-    },
-    response: "positive",
-    responseDetails: {
-      date: "2025-03-06",
-      time: "15:30",
-      type: "text",
-      content: "All clear.",
-    },
-  },
-  {
-    id: 3,
-    alert_id: 12,
-    name: "Lina Maouchi",
-    contact: {
-      email: "l.maouchi@gmail.com",
-      phone: "0777123456",
-    },
-    current_position: {
-      latitude: "36.365059",
-      longitude: "6.614789",
-    },
-    response: "none",
-    responseDetails: null,
-  },
-  {
-    id: 4,
-    alert_id: 13,
-    name: "Amine Haddad",
-    contact: {
-      email: "amine.haddad@yahoo.com",
-      phone: "0556789012",
-    },
-    current_position: {
-      latitude: "36.00069",
-      longitude: "5.75",
-    },
-    response: "negative",
-    responseDetails: {
-      date: "2025-03-07",
-      time: "10:00",
-      type: "text",
-      content: "Need assistance.",
-    },
-  },
-  {
-    id: 5,
-    alert_id: 14,
-    name: "Sarah Bouzid",
-    contact: {
-      email: "s.bouzid@hotmail.com",
-      phone: "0655123456",
-    },
-    current_position: {
-      latitude: "36.755871",
-      longitude: "5.084042",
-    },
-    response: "positive",
-    responseDetails: {
-      date: "2025-03-07",
-      time: "08:45",
-      type: "vocale",
-      content: "All good here.",
-    },
-  },
-  {
-    id: 6,
-    alert_id: 15,
-    name: "Rachid Belhadj",
-    contact: {
-      email: "rachid.belhadj@gmail.com",
-      phone: "0543234567",
-    },
-    current_position: {
-      latitude: "33.806484",
-      longitude: "-1.030134",
-    },
-    response: "none",
-    responseDetails: null,
-  },
-];
-
 const AlertDetailsPage = () => {
   const { alert_id } = useParams();
+  const [rowDataa, setRowDataa] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(null);
   const [error, setError] = useState(false);
-  const enhancedRowData = rowData.map((row) => ({
-    ...row,
-    alert_id: alert_id,
-    response: row.response.toLowerCase() === "none" ? "None" : row.response,
-  }));
+  const [success, setSuccess] = useState(null);
+
   useEffect(() => {
-    if (alert_id) {
-      setLoading(false);
-    } else {
-      const timer = setTimeout(() => {
+    const fetchUsers = async () => {
+      if (!alert_id) {
+        setFetchError("Missing alert ID.");
         setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await impactedUsers(alert_id);
+        const data = response?.data;
+        console.log("Response data:", data); // Debugging line
+
+        const formatted = data?.map(({ user, reply }) => {
+          let responseDetails = null;
+          let response = "None";
+
+          if (reply !== null) {
+            response = "Replied";
+
+            const dateObj = new Date(reply.reply_date);
+            const date = dateObj.toISOString().split("T")[0]; // YYYY-MM-DD
+            const time = dateObj.toTimeString().split(" ")[0].slice(0, 5); // HH:mm
+
+            const type = reply.audio_url ? "audio" : "text";
+
+            responseDetails = {
+              date,
+              time,
+              type,
+              content: reply.text || "",
+              ...(reply.audio_url && { audio_url: reply.audio_url }),
+            };
+          }
+
+          return {
+            id: user.id,
+            alert_id,
+            name: `${user.first_name} ${user.last_name}`,
+            contact: {
+              email: user.email,
+              phone: user.phone_number,
+            },
+            current_position: {
+              user_id: user.id,
+            },
+            response,
+            responseDetails,
+          };
+        });
+
+        console.log("Formatted data:", formatted); // Debugging line
+
+        setRowDataa(formatted);
+        setSuccess("Impacted users fetched successfully.");
+        setError(false);
+        setFetchError(null);
+      } catch (err) {
+        console.error(err);
+        setFetchError("Failed to fetch impacted users.");
         setError(true);
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
   }, [alert_id]);
+
+  useEffect(() => {
+    console.log("Row data updated:", rowDataa); // Debugging line
+  }, [rowDataa]);
 
   return (
     <div className="min-h-screen w-full p-[2em] py-[3em] flex flex-col gap-[2em] relative">
+      <StatusMessage
+        error={fetchError}
+        success={success}
+        isLoading={loading}
+        hideAlert={() => {
+          setFetchError(null);
+          setSuccess(null);
+        }}
+      />
+
       {!loading && (
         <Link
           href="/dashboard/alerts"
@@ -290,21 +247,21 @@ const AlertDetailsPage = () => {
         <div className="center flex-col gap-4 h-full">
           <MdErrorOutline className="text-[1.5em] text-red-500" />
           <p className="font-medium text-txt">
-            No alert with the id <span className="text-main">{alert_id}</span>{" "}
+            No alert with the ID <span className="text-main">{alert_id}</span>{" "}
             was found.
           </p>
         </div>
       ) : (
-        <div className="flex flex-col  border-2 border-[#D0D5DD] rounded-lg p-4">
+        <div className="flex flex-col border-2 border-[#D0D5DD] rounded-lg p-4">
           <DataTable
             initialFontSize="12px"
             headers={headers}
             rowStructure={rowStructure}
-            rowData={enhancedRowData}
+            rowData={rowDataa}
             onClickContent={[]}
             rowClass={""}
             TableClass={"!border-2 !border-transparent"}
-            TableText={"Alerts list"}
+            TableText={"Impacted Users"}
           />
         </div>
       )}
