@@ -1,5 +1,7 @@
 import axios from "./authBase";
-//import Cookies from "js-cookie";
+import Cookies from "js-cookie";
+
+const accessToken = Cookies.get("access");
 
 export const handleLogin = async (email, password) => {
   console.log("Auth base URL:", process.env.NEXT_PUBLIC_API_BASE_URL_AUTH);
@@ -37,6 +39,27 @@ export const getAllUsers = async () => {
     return response.data.data;
   } catch (error) {
     console.error("Error fetching users:", error);
+    throw error;
+  }
+};
+
+export const getUser = async (id) => {
+  console.log("Fetching user with ID:", id);
+
+  try {
+    const response = await axios.get("/users", {
+      params: { ids: id },
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      withCredentials: true, // Optional: only if your API uses cookies/session
+    });
+
+    console.log(`Fetched user with ID ${id}:`, response.data);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching user with ID ${id}:`, error);
     throw error;
   }
 };
