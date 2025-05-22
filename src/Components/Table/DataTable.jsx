@@ -46,7 +46,7 @@ const DataTable = ({
   TableClass,
   TableText,
   initialFontSize = "16px",
-  onClickRow = null,
+  onClickRow = () => {},
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState(null);
