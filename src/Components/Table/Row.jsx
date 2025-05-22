@@ -8,7 +8,7 @@ const Row = ({
   handleRowClick,
   onClickContent,
   rowClass,
-  setClickedRow = null,
+  setClickedRow = () => {},
 }) => {
   const handleClick = () => {
     if (clickedRowId === data.id) {
