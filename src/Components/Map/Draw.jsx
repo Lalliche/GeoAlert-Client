@@ -12,9 +12,12 @@ import { GoAlert } from "react-icons/go";
 import InputField from "@/Components/Global/InputField";
 import useField from "@/hooks/useField";
 import { MdOutlineAbc, MdOutlineAddLocation } from "react-icons/md";
-import { addAlert } from "@/api/alertApi";
+import { addAlert, getAllTypes } from "@/api/alertApi";
 import { deleteZone } from "@/api/zonesApi";
 import StatusMessage from "@/Components/Global/StatusMessage";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { format } from "date-fns";
 
 const AssigningAlert = ({
   setAssignAlert,
@@ -31,10 +34,33 @@ const AssigningAlert = ({
   const [repeat, setRepeat] = useState("");
   const [severity, setSeverity] = useState("");
   const [type, setType] = useState("");
-  const [notificationTypes, setNotificationTypes] = useState({
-    sms: false,
-    email: false,
-  });
+  const [types, setTypes] = useState([]);
+  const [startDateTime, setStartDateTime] = useState(null);
+  const [endDateTime, setEndDateTime] = useState(null);
+
+  useEffect(() => {
+    const fetchTypes = async () => {
+      try {
+        const response = await getAllTypes();
+        console.log("Fetched types responseeeeeeeee:", response);
+        const typesArray = response || [];
+
+        // Extract only the names
+        const typeNames = typesArray.map((type) => type.name);
+
+        setTypes(typeNames);
+      } catch (error) {
+        console.error("Error fetching types:", error);
+        setError("Failed to fetch types.");
+      }
+    };
+
+    fetchTypes();
+  }, []);
+
+  useEffect(() => {
+    console.log("Fetched types:", types);
+  }, [types]);
 
   const [error, setTheError] = useState(null);
 
@@ -42,16 +68,28 @@ const AssigningAlert = ({
     if (
       !alertName.value ||
       !alertName.isValid ||
-      !startDate ||
-      (endDate && new Date(endDate) < new Date(startDate)) ||
+      !startDateTime ||
       !message.trim() ||
       !repeat ||
       isNaN(repeat) ||
       repeat <= 0 ||
       !severity ||
-      !type
+      !type ||
+      (endDateTime &&
+        format(endDateTime, "yyyy-MM-dd HH:mm") <=
+          format(startDateTime, "yyyy-MM-dd HH:mm"))
     ) {
       setTheError("Please insert all fields correctly.");
+      console.log("Error in form submission");
+      console.log("🔍 Debug Alert Submission:");
+      console.log("Alert Name:", alertName.value);
+      console.log("Start DateTime:", startDate);
+      console.log("End DateTime:", endDate || "N/A");
+      console.log("Message:", message.trim());
+      console.log("Repeat (s):", repeat);
+      console.log("Severity:", severity);
+      console.log("Type:", type);
+
       return;
     }
 
@@ -63,15 +101,16 @@ const AssigningAlert = ({
         notification_type: "APP-Notification",
         gravity: severity,
         message: message.trim(),
-        StartDate: `${startDate} 00:00:00`,
-        EndDate: endDate ? `${endDate} 23:59:59` : null,
+        StartDate: format(startDateTime, "yyyy-MM-dd HH:mm:ss"),
+        EndDate: endDateTime
+          ? format(endDateTime, "yyyy-MM-dd HH:mm:ss")
+          : null,
+
         frequency: String(repeat),
         type: type.toLowerCase(),
         ZoneSelected: selectedZone.name,
       });
       setSuccess("Alert successfully created");
-
-      console.log("Alert successfully created");
       setAssignAlert(false);
     } catch (error) {
       console.error("Failed to create alert:", error);
@@ -79,13 +118,6 @@ const AssigningAlert = ({
     } finally {
       setLoading(false);
     }
-  };
-
-  const toggleNotification = (notifType) => {
-    setNotificationTypes((prev) => ({
-      ...prev,
-      [notifType]: !prev[notifType],
-    }));
   };
 
   return (
@@ -131,33 +163,41 @@ const AssigningAlert = ({
           />
         </div>
 
-        {/* Start Date */}
-        <label className="text-sm font-semibold">Starting Date</label>
-        <input
-          type="date"
-          value={startDate}
-          onChange={(e) => {
-            setStartDate(e.target.value);
+        {/* Start Date & Time */}
+        <label className="text-sm font-semibold">Start Date & Time</label>
+        <DatePicker
+          selected={startDateTime}
+          onChange={(date) => {
+            setStartDateTime(date);
             setError(null);
           }}
+          showTimeSelect
+          dateFormat="yyyy-MM-dd HH:mm"
+          timeFormat="HH:mm"
+          placeholderText="Select start date and time"
           className="w-full text-txt font-semibold p-4 rounded-lg btn-shadow focus:outline-none transition-all duration-200"
         />
 
-        {/* End Date */}
-        <label className="text-sm font-semibold">Ending Date (optional)</label>
-        <input
-          type="date"
-          value={endDate}
-          onChange={(e) => {
-            const newEndDate = e.target.value;
-            if (startDate && new Date(newEndDate) < new Date(startDate)) {
+        {/* End Date & Time */}
+        <label className="text-sm font-semibold">
+          End Date & Time (optional)
+        </label>
+        <DatePicker
+          selected={endDateTime}
+          onChange={(date) => {
+            console.log("End date selected:", date);
+            if (startDateTime && date < startDateTime) {
               setError("Ending date cannot be before the starting date.");
-              setEndDate(""); // Clear it if it's invalid
+              setEndDateTime(null);
             } else {
-              setEndDate(newEndDate);
+              setEndDateTime(date);
               setError(null);
             }
           }}
+          showTimeSelect
+          dateFormat="yyyy-MM-dd HH:mm"
+          timeFormat="HH:mm"
+          placeholderText="Select end date and time"
           className="w-full text-txt font-semibold p-4 rounded-lg btn-shadow focus:outline-none transition-all duration-200"
         />
 
@@ -173,27 +213,6 @@ const AssigningAlert = ({
           className="w-full text-txt font-semibold p-4 min-h-16 rounded-lg btn-shadow focus:outline-none transition-all duration-200"
           rows={4}
         />
-
-        {/* Notification Type */}
-        <label className="text-sm font-semibold">Notification Type</label>
-        <div className="flex gap-4">
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={notificationTypes.sms}
-              onChange={() => toggleNotification("sms")}
-            />{" "}
-            SMS
-          </label>
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={notificationTypes.email}
-              onChange={() => toggleNotification("email")}
-            />{" "}
-            Email
-          </label>
-        </div>
 
         {/* Repeat */}
         <label className="text-sm font-semibold">Repeat (in seconds)</label>
@@ -235,9 +254,11 @@ const AssigningAlert = ({
           className="w-full p-4 rounded-lg btn-shadow font-semibold focus:outline-none transition-all duration-200"
         >
           <option value="">Select type</option>
-          <option value="Inondation">Inondation</option>
-          <option value="Earthquake">Earthquake</option>
-          <option value="Fire">Fire</option>
+          {types.map((t, index) => (
+            <option key={index} value={t}>
+              {t.charAt(0).toUpperCase() + t.slice(1)}
+            </option>
+          ))}
         </select>
       </div>
 
@@ -400,7 +421,8 @@ const DrawMap = () => {
     try {
       setLoading(true);
       setError(null); // Clear previous errors
-      const response = await deleteZone(selectedZone.name);
+      console.log("Deleting zone:", selectedZone);
+      const response = await deleteZone(selectedZone.id);
       console.log("Zone deleted successfully:", response);
       setSuccess("Zone deleted successfully.");
     } catch (error) {
