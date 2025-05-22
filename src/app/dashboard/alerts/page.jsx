@@ -184,7 +184,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(null);
   const [clickedRow, setClickedRow] = useState(null);
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState("Active"); // "Active", "Expired", "All"
   const [refresh, setRefresh] = useState(false);
   const [err, setErr] = useState(null);
   const [success, setSuccess] = useState(null);
