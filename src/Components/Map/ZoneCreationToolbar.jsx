@@ -368,8 +368,8 @@ const ZoneCreationToolbar = ({ onBack, drawnItems, onZoneCreated }) => {
     } else if (hasSelectedCity) {
       // Use the selected city's coordinates
       zoneCoordinates = selectedCity.coordinates.map((coord) => ({
-        latitude: coord[0],
-        longitude: coord[1],
+        latitude: coord.latitude,
+        longitude: coord.longitude,
       }));
     }
 
