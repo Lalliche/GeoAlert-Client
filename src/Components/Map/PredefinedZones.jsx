@@ -41,12 +41,12 @@ const PredefinedZones = ({
     const fetchZones = async () => {
       try {
         const response = await getAllZones();
-        const zones = response.message; // <-- this is the actual array
+        const zones = response?.message; // <-- this is the actual array
 
         console.log("Fetched zones:", zones);
         console.log(
           "Fetched zones length:",
-          zones[0].polygon?.geometry?.coordinates
+          zones[0]?.polygon?.geometry?.coordinates
         );
 
         const formattedZones = zones.map((zone) => ({
@@ -54,13 +54,14 @@ const PredefinedZones = ({
           riskLevel: "---", // or derive if available
           lastChecked: "--", // or replace with actual if available
           coordinates:
-            zone.polygon?.geometry?.coordinates
+            zone?.polygon?.geometry?.coordinates
               ?.flat()
               .map(([lng, lat]) => [lat, lng]) || [],
 
-          type: zone.type || null, // or hardcode if your API doesn't return it
+          type: zone?.type || null, // or hardcode if your API doesn't return it
           color: "#31486CFF", // helper function below
-          hasAlert: zone.isActive, // adjust based on actual field
+          hasAlert: zone?.isActive, // adjust based on actual field
+          id: zone?.id || null,
         }));
 
         console.log("Predefined zones formatted:", formattedZones);
@@ -157,6 +158,7 @@ const PredefinedZones = ({
               name: zone.name,
               hasAlert: zone.hasAlert,
               polygon,
+              id: zone.id,
             });
           } else {
             setSelectedZone(null);
