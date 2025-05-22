@@ -34,6 +34,7 @@ const AdminRoutes = [
     Icon: TbMap2,
     path: "/dashboard/zones",
     pathName: "Zones",
+    isPartialMatch: true,
   },
 ];
 
