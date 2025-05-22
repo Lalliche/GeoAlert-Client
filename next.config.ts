@@ -3,14 +3,22 @@ import path from "path";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  
-  // Turbopack-specific configuration
+
+  async redirects() {
+    return [
+      {
+        source: "/", // when someone accesses /
+        destination: "/login", // redirect them to /login
+        permanent: false, // use true if it's a permanent redirect
+      },
+    ];
+  },
+
   experimental: {
     turbo: {
       resolveAlias: {
         "@components": [path.resolve(__dirname, "./src/components")],
-        // Add other aliases here
-      }
+      },
     },
     scrollRestoration: true,
   },
