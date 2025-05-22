@@ -77,25 +77,7 @@ export const getZones = async () => {
       }
     );
 
-    return response.data; // returns the list of zones
-  } catch (error) {
-    console.error("Error fetching zones:", error);
-    throw error; // rethrow for the caller to handle
-  }
-};
-
-export const getAllZones = async () => {
-  try {
-    const response = await axios.get(
-      "/AllZones",
-
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json", // ⬅️ Add Bearer token
-        },
-      }
-    );
+    console.log("Zones data debug:", response.data); // Debugging line
 
     return response.data; // returns the list of zones
   } catch (error) {
