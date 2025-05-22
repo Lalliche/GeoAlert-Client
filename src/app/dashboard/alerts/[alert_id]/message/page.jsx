@@ -34,7 +34,8 @@ export default function AlertMessagePage() {
 
     try {
       setIsLoading(true);
-      await updateAlert(alert_id, { message });
+      await updateAlert({ id: alert_id, updatedData: { message } });
+
       setSuccess("Alert updated successfully!");
       setIsEditing(false);
     } catch (error) {
