@@ -1,13 +1,14 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import L from "leaflet";
-import { iconComponents } from "./Icons";
+import { iconComponents } from "@/lib/alertIcons"; // adjust path as needed
 import { useMap } from "react-leaflet";
 import { createRoot } from "react-dom/client";
 import "leaflet-draw";
 import "leaflet/dist/leaflet.css";
 import "leaflet-draw/dist/leaflet.draw.css";
-import { getAllZones } from "@/api/zonesApi";
+import { getZones } from "@/api/zonesApi";
+import { getZoneColor } from "@/lib/zoneColoring"; // adjust path as needed
 
 const lightenColor = (hex, amount = 0.2) => {
   const num = parseInt(hex.slice(1), 16);
@@ -40,28 +41,24 @@ const PredefinedZones = ({
   useEffect(() => {
     const fetchZones = async () => {
       try {
-        const response = await getAllZones();
-        const zones = response?.message; // <-- this is the actual array
+        const response = await getZones();
+        const zones = response;
 
         console.log("Fetched zones:", zones);
-        console.log(
-          "Fetched zones length:",
-          zones[0]?.polygon?.geometry?.coordinates
-        );
 
         const formattedZones = zones.map((zone) => ({
           name: zone.name || "Unnamed Zone",
           riskLevel: "---", // or derive if available
           lastChecked: "--", // or replace with actual if available
-          coordinates:
-            zone?.polygon?.geometry?.coordinates
-              ?.flat()
-              .map(([lng, lat]) => [lat, lng]) || [],
-
-          type: zone?.type || null, // or hardcode if your API doesn't return it
-          color: "#31486CFF", // helper function below
+          coordinates: zone.coordinates.map((coord) => [
+            coord.latitude,
+            coord.longitude,
+          ]),
+          type: zone?.alertType?.name || null, // or hardcode if your API doesn't return it
+          color: getZoneColor(zone),
+          icon: zone?.alertType?.icon || null, // or hardcode if your API doesn't return it
           hasAlert: zone?.isActive, // adjust based on actual field
-          id: zone?.id || null,
+          id: zone?._id || null,
         }));
 
         console.log("Predefined zones formatted:", formattedZones);
@@ -75,6 +72,7 @@ const PredefinedZones = ({
   }, [zoneCreatedFlag]);
 
   // Render the marker for each zone
+
   const renderMarker = (center, iconKey) => {
     const zoom = map.getZoom();
     const iconSize = Math.max(12, zoom * 2);
@@ -90,9 +88,11 @@ const PredefinedZones = ({
     iconDiv.style.justifyContent = "center";
     iconDiv.style.boxShadow = "0 0 6px rgba(0,0,0,0.2)";
 
-    const IconComponent = iconComponents[iconKey] || iconComponents.default;
+    const IconComponent =
+      iconComponents[iconKey] || iconComponents.FaMapMarkerAlt;
+
     const root = createRoot(iconDiv);
-    root.render(<IconComponent color="red" size={iconSize} />);
+    root.render(<IconComponent size={iconSize} color="red" />);
 
     const icon = L.divIcon({
       html: iconDiv,
@@ -175,7 +175,7 @@ const PredefinedZones = ({
 
         polygon.addTo(drawnItems);
         const center = polygon.getBounds().getCenter();
-        renderMarker(center, zone.type);
+        renderMarker(center, zone.icon);
       });
     };
 
