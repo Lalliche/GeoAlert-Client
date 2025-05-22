@@ -4,7 +4,7 @@ import { IoFilter } from "react-icons/io5";
 
 export const Filter = ({ Status }) => {
   const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState("");
+  const [selected, setSelected] = useState("Active");
 
   useEffect(() => {
     Status(selected);
