@@ -84,7 +84,7 @@ export const updateAlert = async ({ id, updatedData }) => {
   try {
     console.log("Updating alert with ID:", id, "and data:", updatedData); // ⬅️ Debugging line
 
-    const response = await axios.patch(`/updateAlert/${id}`, updatedData, {
+    const response = await axios.post(`/updateAlert/${id}`, updatedData, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         "Content-Type": "application/json",
@@ -103,24 +103,70 @@ export const updateAlert = async ({ id, updatedData }) => {
 };
 
 export const deleteAlert = async (id) => {
+  console.log("Deleting alert with ID:", id);
   try {
     console.log("Deleting alert with ID:", id);
 
-    const response = await axios.delete("/deleteAlert", {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-      data: { id }, // ⬅️ 'data' is how axios sends body with DELETE
-    });
+    const response = await axios.post(
+      `/deleteAlert/${id}`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     console.log("Alert deleted:", response.data);
     return response.data;
   } catch (error) {
+    console.error("Error deleting alert:", error);
+    throw error;
+  }
+};
+
+export const getAllTypes = async () => {
+  try {
+    const response = await axios.get("/AllTypes", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+    });
+    console.log("Types fetched:", response.data); // ⬅️ Debugging line
+
+    return response.data;
+  } catch (error) {
     console.error(
-      "Error deleting alert:",
+      "Error fetching types:",
       error.response?.data || error.message
     );
+    throw error;
+  }
+};
+
+export const addTypeAlert = async ({ color, name, icon }) => {
+  try {
+    const response = await axios.post(
+      "/AddTypeAlert",
+      {
+        color,
+        name,
+        icon,
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    console.log("Type added:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error adding type:", error.response?.data || error.message);
     throw error;
   }
 };
