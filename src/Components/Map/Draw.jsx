@@ -95,6 +95,7 @@ const AssigningAlert = ({
 
     try {
       setLoading(true);
+      console.log("Type:", type);
 
       await addAlert({
         alertTitle: alertName.value,
