@@ -32,7 +32,8 @@ const AdminRoutes = [
   {
     name: "Zones Management",
     Icon: TbMap2,
-    path: "/dashboard/zones",
+    path: "/dashboard/zones", // used for isActive check
+    opt: "/dashboard/zones?map", // used for navigation
     pathName: "Zones",
     isPartialMatch: true,
   },
@@ -80,11 +81,11 @@ const SideBar = () => {
 
               return (
                 <Link
-                  href={route.path}
+                  href={route.opt || route.path}
                   key={index}
                   className={`flex flex-row font-semibold items-center gap-[1.5em] py-[0.5em] px-[0.75em] rounded-sm transition-all font-titillium-web ${
                     isActive
-                      ? "bg-[#FFF5F5] text-main  border-l-[3px] border-main "
+                      ? "bg-[#FFF5F5] text-main border-l-[3px] border-main"
                       : "text-[#7A7A7A] hover:text-[#DC091A] hover:bg-[#F5F5F5]"
                   }`}
                 >
