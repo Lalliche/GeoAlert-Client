@@ -18,6 +18,72 @@ import StatusMessage from "@/Components/Global/StatusMessage";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";
+import { IoFilter } from "react-icons/io5";
+
+const ZoneFilter = ({ alertType }) => {
+  const [allTypes, setAllTypes] = useState([]);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [selectedType, setSelectedType] = useState("all");
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchTypes = async () => {
+      try {
+        const data = await getAllTypes();
+        setAllTypes(data);
+      } catch (err) {
+        setError("Failed to fetch alert types.");
+        console.error(err);
+      }
+    };
+
+    fetchTypes();
+  }, []);
+
+  const handleSelect = (typeName) => {
+    setSelectedType(typeName);
+    alertType(typeName);
+    setShowDropdown(false);
+  };
+
+  return (
+    <div
+      className="absolute text-txt top-2 left-12 z-[1000]  p-4  flex flex-col gap-[1em] font-space-grotesk"
+      style={{ width: "max-content" }}
+    >
+      <button
+        onClick={() => setShowDropdown((prev) => !prev)}
+        className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded hover:bg-gray-100 shadow-sm"
+      >
+        <IoFilter size={20} />
+        <span className="text-sm">
+          {selectedType === "all" ? "All Types" : selectedType}
+        </span>
+      </button>
+
+      {showDropdown && (
+        <div className="flex flex-col gap-[1em] bg-white mt-4 max-h-60 overflow-auto">
+          <div
+            onClick={() => handleSelect("all")}
+            className="cursor-pointer hover:bg-gray-100 px-3 py-2 rounded"
+          >
+            All Types
+          </div>
+          {allTypes.map((type) => (
+            <div
+              key={type.id}
+              onClick={() => handleSelect(type.name)}
+              className="cursor-pointer hover:bg-gray-100 px-3 py-2 rounded"
+            >
+              {type.name}
+            </div>
+          ))}
+          {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const AssigningAlert = ({
   setAssignAlert,
@@ -42,7 +108,6 @@ const AssigningAlert = ({
     const fetchTypes = async () => {
       try {
         const response = await getAllTypes();
-        console.log("Fetched types responseeeeeeeee:", response);
         const typesArray = response || [];
 
         // Extract only the names
@@ -366,45 +431,16 @@ const DrawMap = () => {
 
   const [predefinedZones, setPredefinedZones] = useState([]);
 
-  /* useEffect(() => {
-    const fetchZones = async () => {
-      try {
-        const zones = await getAllZones();
-        setPredefinedZones(zones);
-      } catch (error) {
-        console.error("Failed to fetch predefined zones:", error);
-      }
-    };
-
-    fetchZones();
-  }, []); */
-
-  /* useEffect(() => {
-    if (predefinedZones.length > 0) {
-      predefinedZones.forEach((zone) => {
-        const polygon = L.polygon(zone.coordinates, {
-          color: zone.color,
-          fillColor: zone.fillColor,
-          fillOpacity: 0.5,
-        }).addTo(drawnItems);
-
-        polygon.on("click", () => {
-          setSelectedZone(zone);
-        });
-      });
-    }
-    console.log("Predefined Zones:", predefinedZones);
-  }, [predefinedZones]); */
-
   const [zoneCreatedFlag, setZoneCreatedFlag] = useState(false);
 
   const notifyZoneCreated = () => {
-    // Toggle flag to trigger useEffect in PredefinedZones
+    console.log("Zone created/deleteing notification triggered.");
     setZoneCreatedFlag((prev) => !prev);
   };
 
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [info, setInfo] = useState(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -419,13 +455,19 @@ const DrawMap = () => {
       return;
     }
 
+    if (selectedZone.hasAlert) {
+      setInfo("Cannot delete a zone with an assigned alert.");
+      return;
+    }
+
     try {
       setLoading(true);
-      setError(null); // Clear previous errors
+      setError(null);
       console.log("Deleting zone:", selectedZone);
       const response = await deleteZone(selectedZone.id);
       console.log("Zone deleted successfully:", response);
       setSuccess("Zone deleted successfully.");
+      notifyZoneCreated();
     } catch (error) {
       console.error("Failed to delete zone:", error);
       setError("Failed to delete zone.");
@@ -436,15 +478,19 @@ const DrawMap = () => {
     }
   };
 
+  const [alertType, setAlertType] = useState("all");
+
   return (
     <div className="relative w-full h-[700px]">
       <StatusMessage
         error={error}
         success={success}
+        info={info}
         isLoading={loading}
         hideAlert={() => {
           setError(null);
           setSuccess(null);
+          setInfo(null);
         }}
       />
       <div
@@ -466,6 +512,8 @@ const DrawMap = () => {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution="&copy; OpenStreetMap contributors"
           />
+
+          <ZoneFilter alertType={setAlertType} />
 
           {selectedZone && step === "initial" && !assignAlert && (
             <ZoneClicked
