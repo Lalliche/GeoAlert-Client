@@ -5,6 +5,8 @@ const DeleteZonePopup = ({
   setSelectedZoneName,
   setShowDeletePopup,
 }) => {
+  console.log("DeleteZonePopup", selectedZoneRef, selectedPresetMarker);
+
   const handleDelete = () => {
     // Remove the zone layer and the marker
     drawnItems.removeLayer(selectedZoneRef.current);
