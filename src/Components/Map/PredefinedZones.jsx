@@ -48,15 +48,14 @@ const PredefinedZones = ({
 
         const formattedZones = zones.map((zone) => ({
           name: zone.name || "Unnamed Zone",
-          riskLevel: "---", // or derive if available
-          lastChecked: "--", // or replace with actual if available
+          riskLevel: zone?.gravity, // or derive if available
           coordinates: zone.coordinates.map((coord) => [
             coord.latitude,
             coord.longitude,
           ]),
-          type: zone?.alertType?.name || null, // or hardcode if your API doesn't return it
+          type: zone?.isActive ? zone?.alertType?.name || null : null,
+          icon: zone?.isActive ? zone?.alertType?.icon || null : null,
           color: getZoneColor(zone),
-          icon: zone?.alertType?.icon || null, // or hardcode if your API doesn't return it
           hasAlert: zone?.isActive, // adjust based on actual field
           id: zone?._id || null,
         }));
@@ -90,7 +89,6 @@ const PredefinedZones = ({
 
     const IconComponent =
       iconComponents[iconKey] || iconComponents.FaMapMarkerAlt;
-
     const root = createRoot(iconDiv);
     root.render(<IconComponent size={iconSize} color="red" />);
 
@@ -101,7 +99,7 @@ const PredefinedZones = ({
       iconAnchor: [containerSize / 2, containerSize / 2],
     });
 
-    L.marker(center, { icon }).addTo(map);
+    return L.marker(center, { icon });
   };
 
   // Render predefined zones and handle click events
@@ -111,15 +109,15 @@ const PredefinedZones = ({
     }
 
     const renderPredefinedZones = () => {
+      drawnItems.clearLayers(); // Clear both polygons and markers
+
       predefinedZones.forEach((zone) => {
-        console.log("Rendering zone:", zone);
         const polygon = L.polygon(zone.coordinates, {
           color: zone.hasAlert ? zone.color : lightenColor(zone.color, 0.5),
           weight: 3,
           dashArray: zone.hasAlert ? "6, 6" : "",
         });
 
-        // Hover effect: scale-up when hovered
         polygon.on("mouseover", () => {
           polygon.setStyle({
             weight: 4,
@@ -134,9 +132,7 @@ const PredefinedZones = ({
           });
         });
 
-        // Pulse effect: applied to the selected polygon
         polygon.on("click", () => {
-          // Reset previous selected zone style if it was different
           if (selectedZone && selectedZone.polygon !== polygon) {
             selectedZone.polygon.setStyle({
               dashArray: "",
@@ -145,7 +141,6 @@ const PredefinedZones = ({
             });
           }
 
-          // Toggle the selection
           const isDashed = polygon.options.dashArray === "6, 6";
           polygon.setStyle({
             dashArray: isDashed ? "" : "6, 6",
@@ -153,29 +148,31 @@ const PredefinedZones = ({
             color: zone.hasAlert ? zone.color : lightenColor(zone.color, 0.5),
           });
 
-          if (!isDashed) {
-            setSelectedZone({
-              name: zone.name,
-              hasAlert: zone.hasAlert,
-              polygon,
-              id: zone.id,
-            });
-          } else {
-            setSelectedZone(null);
-          }
+          setSelectedZone(
+            isDashed
+              ? null
+              : {
+                  name: zone.name,
+                  hasAlert: zone.hasAlert,
+                  polygon,
+                  id: zone.id,
+                }
+          );
         });
 
         polygon.bindPopup(
           `<div>
-            <strong>Zone Credentials</strong><br />
-            Name: ${zone.name}<br />
-            ${zone.hasAlert ? "This zone has an alert!" : ""}<br />
-          </div>`
+        <strong>Zone Credentials</strong><br />
+        Name: ${zone.name}<br />
+        Type: ${zone.type || "N/A"}<br />
+        ${zone.hasAlert ? "This zone has an alert!" : ""}<br />
+      </div>`
         );
 
         polygon.addTo(drawnItems);
         const center = polygon.getBounds().getCenter();
-        renderMarker(center, zone.icon);
+        const marker = renderMarker(center, zone.icon);
+        marker.addTo(drawnItems);
       });
     };
 
