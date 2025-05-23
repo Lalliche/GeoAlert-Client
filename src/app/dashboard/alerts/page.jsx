@@ -111,6 +111,7 @@ const rowStructure = [
             pathname: `/dashboard/alerts/${data?.id}/message`,
             query: { message: data?.msg },
           }}
+          onClick={(e) => e.stopPropagation()}
           className="px-[0.75em] py-[0.25em] box-shadow row gap-[0.5em] rounded-lg border border-transparent hover:scale-105 transition-all hover:border-black flex items-center"
         >
           <BsArrowsAngleExpand />
@@ -126,6 +127,7 @@ const rowStructure = [
       return (
         <Link
           href={`/dashboard/alerts/${row.id}/users`}
+          onClick={(e) => e.stopPropagation()}
           className="px-[0.75em] py-[0.25em] box-shadow row gap-[0.5em] rounded-lg border border-transparent hover:border-black flex items-center"
         >
           <FiUsers />
