@@ -170,3 +170,23 @@ export const addTypeAlert = async ({ color, name, icon }) => {
     throw error;
   }
 };
+
+export const deleteTypeAlert = async (id) => {
+  try {
+    const response = await axios.delete(`/AlertType/${id}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    console.log("Type deleted:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error deleting type:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
