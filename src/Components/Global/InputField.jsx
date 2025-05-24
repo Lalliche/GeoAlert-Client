@@ -18,6 +18,7 @@ const InputField = ({
   onBlur,
   displayHolder = true,
   inputClassName = "",
+  disabled = false,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [isDelayedValid, setIsDelayedValid] = useState(true);
@@ -93,6 +94,7 @@ const InputField = ({
             setIsFocused(false);
             onBlur && onBlur(e);
           }}
+          disabled={disabled}
         />
 
         {inputType === "password" &&
