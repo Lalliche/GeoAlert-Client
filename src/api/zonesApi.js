@@ -5,19 +5,19 @@ import Cookies from "js-cookie";
 const accessToken = Cookies.get("access");
 
 export const addZone = async (name, coordinates) => {
-  console.log("Adding zone with name:", name, "and coordinates:", coordinates); // ⬅️ Debugging line
+  console.log("Adding zone with name:", name, "and coordinates:", coordinates);
 
   try {
-    const response = await axios.post(
-      "/addZone",
-      { name, coordinates },
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json", // ⬅️ Add Bearer token
-        },
-      }
-    );
+    const body = coordinates ? { name, coordinates } : { name };
+
+    console.log("Request body debug:", body); // ⬅️ Debugging line
+
+    const response = await axios.post("/addZone", body, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+    });
 
     return response.data;
   } catch (error) {
@@ -153,22 +153,20 @@ export const getFrequency = async () => {
   }
 };
 
-export const getUserInZone = async (zoneName) => {
-  console.log("Fetching users in zone:", zoneName); // Debugging line
+export const getUserInZone = async (zoneId) => {
+  console.log("Fetching users in zone with ID:", zoneId);
   try {
-    const encodedZoneName = encodeURIComponent(zoneName);
-
-    const response = await axios.get(`/GetUserInZone/${encodedZoneName}`, {
+    const response = await axios.get(`/zones/${zoneId}/usersInfos`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         "Content-Type": "application/json",
       },
     });
 
-    console.log("Fetched users in zone:", response.data); // Debugging line
-    return response.data; // [{ UserId: "2" }, ...]
+    console.log("Fetched users in zone:", response.data);
+    return response.data; // expect array of users
   } catch (error) {
-    console.error(`Error fetching users in zone ${zoneName}:`, error);
+    console.error(`Error fetching users in zone ID ${zoneId}:`, error);
     throw error;
   }
 };
