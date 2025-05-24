@@ -160,7 +160,7 @@ const OverviewPage = () => {
                 type="text"
                 placeholder="Type name"
                 value={typeName}
-                onChange={(e) => setTypeName(e.target.value)}
+                onChange={(e) => setTypeName(e.target.value.toLowerCase())}
                 className="border px-4 py-2 rounded"
               />
 
