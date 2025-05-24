@@ -96,8 +96,7 @@ const rowStructure = [
           href={{
             pathname: `/dashboard/alerts/${row.alert_id}/users/${row.id}/location`,
             query: {
-              lat: row.current_position.latitude,
-              lng: row.current_position.longitude,
+              duration: "all",
             },
           }}
           className="px-[0.75em] py-[0.25em] box-shadow row gap-[0.5em] rounded-lg border border-transparent hover:border-black flex items-center"
@@ -118,12 +117,20 @@ const rowStructure = [
     width: "w-[20%]",
     content: (contactData, row) => {
       const pathname = usePathname();
+
+      const handleClick = () => {
+        if (row.responseDetails) {
+          localStorage.setItem("reply", JSON.stringify(row.responseDetails));
+        }
+      };
+
       return row.responseDetails ? (
         <Link
           href={{
             pathname: `/dashboard/alerts/${row.alert_id}/users/${row.id}/response`,
             query: { classification: row.response },
           }}
+          onClick={handleClick}
           className="px-[0.75em] py-[0.25em] box-shadow row gap-[0.5em] rounded-lg border border-transparent hover:scale-105 transition-all hover:border-black flex items-center"
         >
           <BsArrowsAngleExpand />
@@ -239,11 +246,7 @@ const AlertDetailsPage = () => {
         </Link>
       )}
 
-      {loading ? (
-        <div className="center h-screen w-full">
-          <Spinner />
-        </div>
-      ) : error ? (
+      {loading ? null : error ? (
         <div className="center flex-col gap-4 h-full">
           <MdErrorOutline className="text-[1.5em] text-red-500" />
           <p className="font-medium text-txt">
