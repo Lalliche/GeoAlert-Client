@@ -24,13 +24,13 @@ const headers = [
   },
   {
     id: "hasAlert",
-    name: "Has Alert",
+    name: "Alert",
     field: "isActive",
     width: "w-[20%]",
   },
   {
     id: "users",
-    name: "Users In",
+    name: "In-Zone Users",
     field: "link",
     width: "w-[40%]",
     sortable: false,
@@ -46,20 +46,35 @@ const rowStructure = [
   {
     field: "isActive",
     width: "w-[20%]",
-    content: (value) => <p className="text-txt">{value ? "Yes" : "No"}</p>,
+    content: (value) => (
+      <p className="text-txt">{value ? "Assigned" : "Unassigned"}</p>
+    ),
   },
   {
     field: "link",
     width: "w-[40%]",
-    content: (_, row) => (
-      <Link
-        href={`/dashboard/zones/dashboard/${row.name}/users`}
-        className="px-[0.75em] py-[0.25em] box-shadow row gap-[0.5em] rounded-lg border border-transparent hover:scale-105 transition-all hover:border-black flex items-center"
-      >
-        <HeartBeatDot />
-        <p className="text-txt">View</p>
-      </Link>
-    ),
+    content: (_, row) => {
+      const handleClick = () => {
+        const zoneData = {
+          id: row.id,
+          name: row.name,
+          isActive: row.isActive,
+          coordinates: row.coordinates,
+        };
+        localStorage.setItem("selectedZone", JSON.stringify(zoneData));
+      };
+
+      return (
+        <Link
+          href={`/dashboard/zones/dashboard/${row.id}/users`}
+          onClick={handleClick}
+          className="px-[0.75em] py-[0.25em] box-shadow row gap-[0.5em] rounded-lg border border-transparent hover:scale-105 transition-all hover:border-black flex items-center"
+        >
+          <HeartBeatDot />
+          <p className="text-txt">View</p>
+        </Link>
+      );
+    },
   },
 ];
 
@@ -78,6 +93,8 @@ const ZoneDash = () => {
         const formatted = response.map((zone) => ({
           name: zone.name,
           isActive: zone.isActive,
+          id: zone._id,
+          coordinates: zone.coordinates,
         }));
         console.log("Formatted zones:", formatted);
 
