@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import Link from "next/link";
 import { useParams } from "next/navigation";
-import dynamic from "next/dynamic";
+import Link from "next/link";
 import { FiArrowLeft } from "react-icons/fi";
 import { MdErrorOutline } from "react-icons/md";
+import dynamic from "next/dynamic";
+import { getUserInZone } from "@/api/zonesApi"; // <-- import here
 
 const UserZoneMap = dynamic(
   () => import("@/Components/Global/UsersPositions"),
@@ -15,55 +16,51 @@ const UserZoneMap = dynamic(
   }
 );
 
-const ZoneUsersPage = () => {
+export default function ZoneUsersPage() {
   const params = useParams();
-  const zoneIdFromParams = params?.zone_id; // assuming your dynamic route is [id]
+  const zoneId = params.zone_id;
+
+  const [users, setUsers] = useState([]);
   const [storedZone, setStoredZone] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [idMismatch, setIdMismatch] = useState(false);
 
   useEffect(() => {
     const zoneData = localStorage.getItem("selectedZone");
     if (zoneData) {
-      console.log("Zone Data from Local Storage:", zoneData);
       const parsedZone = JSON.parse(zoneData);
       setStoredZone(parsedZone);
-      if (parsedZone.id !== zoneIdFromParams) {
+      if (parsedZone.id !== zoneId) {
         setIdMismatch(true);
       } else {
-        console.log("Matched Zone:", parsedZone);
+        setIdMismatch(false);
       }
     } else {
       setIdMismatch(true);
     }
-  }, [zoneIdFromParams]);
+  }, [zoneId]);
 
-  // Dummy users for now — you can fetch real ones later
-  const users = [
-    {
-      UserId: 1,
-      position: {
-        latitude: "35.2",
-        longitude: "-0.7",
-      },
-      firstName: "Aboubakr",
-      lastName: "Belmiloud",
-      phoneNumber: "0123456789",
-      id: 1,
-      email: "belmiloudaboubakr.contact@gmail.com",
-    },
-    {
-      UserId: 2,
-      position: {
-        latitude: "35.15",
-        longitude: "-0.65",
-      },
-      firstName: "Lalliche",
-      lastName: "Abdelhadi",
-      phoneNumber: "0987654321",
-      id: 2,
-      email: "lalliche.abdelhadi@example.com",
-    },
-  ];
+  useEffect(() => {
+    if (storedZone && !idMismatch) {
+      const fetchUsers = async () => {
+        try {
+          const data = await getUserInZone(zoneId);
+          setUsers(data);
+          setError(false);
+        } catch (err) {
+          console.error("Error fetching users:", err);
+          setError(true);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchUsers();
+    } else {
+      setLoading(false);
+    }
+  }, [storedZone, idMismatch, zoneId]);
 
   return (
     <div className="p-4">
@@ -81,6 +78,10 @@ const ZoneUsersPage = () => {
           <MdErrorOutline size={24} />
           <span>Zone ID mismatch or missing zone data.</span>
         </div>
+      ) : loading ? (
+        <p>Loading users...</p>
+      ) : error ? (
+        <p className="text-red-600">Failed to load users.</p>
       ) : (
         <UserZoneMap
           users={users}
@@ -94,6 +95,4 @@ const ZoneUsersPage = () => {
       )}
     </div>
   );
-};
-
-export default ZoneUsersPage;
+}
