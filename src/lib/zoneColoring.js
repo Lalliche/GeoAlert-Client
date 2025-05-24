@@ -1,7 +1,7 @@
 export const getZoneColor = (zone) => {
   if (!zone?.isActive) return "#B0B0B0"; // grey when inactive
 
-  const baseColor = zone?.alertType?.color || "#31486C";
+  const baseColor = zone?.alertType?.color || "#0E2B5BFF";
   const gravity = zone?.gravity?.toLowerCase();
 
   let opacity = 1;
