@@ -70,23 +70,30 @@ const TimeSelectorButton = () => {
   );
 };
 
-const SecondStep = ({ setStep, onBack, zone, onZoneCreated }) => {
+const SecondStep = ({
+  setStep,
+  onBack,
+  zone,
+  onZoneCreated,
+  presetCityName,
+}) => {
   const namePattern = /^[a-zA-Z0-9_\-\s]+$/;
-  const zoneName = useField("", (value) => namePattern.test(value));
+  const zoneName = useField(presetCityName || "", (value) =>
+    namePattern.test(value)
+  );
+
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(null);
 
   const onDone = async () => {
     if (zoneName.isValid && zoneName.value.trim() !== "") {
-      const zoneData = {
-        name: zoneName.value,
-        coordinates: zone,
-      };
+      const name = zoneName.value;
+      const coordinates = presetCityName ? undefined : zone;
 
       try {
         setLoading(true);
-        const response = await addZone(zoneData.name, zoneData.coordinates);
+        const response = await addZone(name, coordinates);
         console.log("Zone added successfully:", response);
         setSuccess("Zone added successfully!");
         onZoneCreated();
@@ -148,6 +155,7 @@ const SecondStep = ({ setStep, onBack, zone, onZoneCreated }) => {
           inputClassName="!p-[0.625em]"
           onFocus={() => zoneName.setFocus(true)}
           onBlur={() => zoneName.setFocus(false)}
+          disabled={presetCityName ? true : false}
         />
       </div>
 
@@ -447,6 +455,7 @@ const ZoneCreationToolbar = ({ onBack, drawnItems, onZoneCreated }) => {
       {/*  {step === 2 && <SecondStep setStep={setStep} />} */}
       {step === 2 && (
         <SecondStep
+          presetCityName={selectedCity?.name}
           setStep={setStep}
           onBack={onBack}
           zone={createdZone}
