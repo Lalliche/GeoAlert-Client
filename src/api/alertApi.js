@@ -146,6 +146,25 @@ export const getAllTypes = async () => {
   }
 };
 
+export const getCountByType = async () => {
+  try {
+    const response = await axios.get("/alerts/count-by-type", {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+    });
+    console.log("Count by type fetched:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error fetching count by type:",
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
+
 export const addTypeAlert = async ({ color, name, icon }) => {
   try {
     const response = await axios.post(
