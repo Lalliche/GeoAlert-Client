@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import AlertType from "@/Components/Global/AlertType";
+import Frequencies from "@/Components/Global/Frequencies";
 import StatusMessage from "@/Components/Global/StatusMessage";
 import Spinner from "@/Components/Global/Spinner";
 
@@ -10,12 +11,7 @@ const page = () => {
   const [error, setError] = useState(null);
 
   return (
-    <div className="w-full h-full px-[2em] pb-[5em] ">
-      {loading && (
-        <div className="center w-full h-full">
-          <Spinner />
-        </div>
-      )}
+    <div className="w-full col gap-[1em] px-[2em] pb-[5em] ">
       <StatusMessage
         error={error}
         success={success}
@@ -25,16 +21,17 @@ const page = () => {
           setSuccess(null);
         }}
       />
-      <div className="w-full h-full flex flex-col gap-4">
-        <h1 className="text-2xl font-bold">Settings</h1>
-        <div className="flex flex-col gap-4">
-          <h2 className="text-xl font-semibold">Alert Types</h2>
-          <AlertType
-            success={setSuccess}
-            error={setError}
-            loading={setLoading}
-          />
-        </div>
+      <h1 className="text-2xl font-bold">Settings</h1>
+      <div className="w-full ">
+        <AlertType success={setSuccess} error={setError} loading={setLoading} />
+      </div>
+
+      <div className="w-full ">
+        <Frequencies
+          success={setSuccess}
+          error={setError}
+          loading={setLoading}
+        />
       </div>
     </div>
   );
