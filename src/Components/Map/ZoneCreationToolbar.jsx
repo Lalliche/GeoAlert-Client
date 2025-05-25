@@ -77,7 +77,8 @@ const SecondStep = ({
   onZoneCreated,
   presetCityName,
 }) => {
-  const namePattern = /^[a-zA-Z0-9_\-\s]+$/;
+  const namePattern = /^[\p{L}0-9_\-\s]+$/u;
+
   const zoneName = useField(presetCityName || "", (value) =>
     namePattern.test(value)
   );
