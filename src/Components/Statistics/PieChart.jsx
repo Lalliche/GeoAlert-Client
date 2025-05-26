@@ -89,16 +89,10 @@ export default function PieChartComponent({ error, loading }) {
 
   const gradients = chartData.map((item, index) => ({
     id: `grad-${index}`,
-    stops:
-      index % 2 === 0
-        ? [
-            { offset: "0%", stopColor: item.color },
-            { offset: "100%", stopColor: "#ffffff" },
-          ]
-        : [
-            { offset: "0%", stopColor: "#ffffff" },
-            { offset: "100%", stopColor: item.color },
-          ],
+    stops: [
+      { offset: "0%", stopColor: item.color },
+      { offset: "100%", stopColor: hexToRgba(item.color, 0.1) },
+    ],
   }));
 
   return (
