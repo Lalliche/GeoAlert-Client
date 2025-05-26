@@ -1,8 +1,36 @@
 "use client";
 import axios from "./authBase";
-//import Cookies from "js-cookie";
+import Cookies from "js-cookie";
 
-//const accessToken = Cookies.get("access");
+export const getUsersByDateRange = async (startDate, endDate) => {
+  const accessToken = Cookies.get("access");
+  console.log("Fetching users from", startDate, "to", endDate);
+
+  try {
+    const response = await axios.get("/users/by-date", {
+      params: {
+        startDate,
+        endDate,
+      },
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    console.log(
+      `Fetched users between ${startDate} and ${endDate}:`,
+      response.data?.data
+    );
+    return response.data?.data || [];
+  } catch (error) {
+    console.error(
+      `Error fetching users between ${startDate} and ${endDate}:`,
+      error
+    );
+    throw error;
+  }
+};
 
 export const handleLogin = async (email, password) => {
   console.log("Auth base URL:", process.env.NEXT_PUBLIC_API_BASE_URL_AUTH);
