@@ -275,7 +275,7 @@ export default function Home() {
               onClickRow={setClickedRow}
             />
           </div>
-          {clickedRow && (
+          {clickedRow && !clickedRow?.isExpired && (
             <AlertModification
               data={clickedRow}
               refresh={setRefresh}
