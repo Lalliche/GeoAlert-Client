@@ -1,12 +1,11 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { GoHome, GoAlert } from "react-icons/go";
 import { TbMap2 } from "react-icons/tb";
-import { FiLogOut, FiUsers } from "react-icons/fi";
+import { FiUsers } from "react-icons/fi";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import Cookies from "js-cookie";
-import Spinner from "./Spinner";
+import { usePathname } from "next/navigation";
+import Image from "next/image";
 import { IoSettingsOutline } from "react-icons/io5";
 
 const AdminRoutes = [
@@ -48,23 +47,13 @@ const AdminRoutes = [
 ];
 
 const SideBar = () => {
-  const router = useRouter();
   const pathname = usePathname();
-
-  const handleLogout = () => {
-    Cookies.remove("role");
-    router.replace("/login");
-    setTimeout(() => {
-      window.location.reload();
-    }, 500);
-  };
 
   return (
     <div className="h-full  overflow-y-auto border-r-2 border-[#E6EFF5] py-8 pl-[2em] pr-[1em] flex flex-col text-[14px] md:text-[16px] gap-6">
-      <p className="text-[#DC091A] text-[1.5em] font-bold text-center">
-        GeoAlert
-      </p>
-
+      <div className="flex justify-center mb-6 w-full">
+        <Image src="/bg_logo.PNG" alt="lkjasdf" width={100} height={100} />
+      </div>
       <div className="w-full justify-between flex flex-col h-full">
         <div className="flex flex-col gap-[1.75em] ">
           {AdminRoutes.map((route, index) => {
@@ -90,13 +79,6 @@ const SideBar = () => {
         </div>
 
         {/* Logout Button */}
-        <div
-          className="flex flex-row items-center gap-3 p-3 mt-auto cursor-pointer text-[#7A7A7A] hover:text-red-500 hover:bg-[#F5F5F5] rounded-md transition-all"
-          onClick={handleLogout}
-        >
-          <FiLogOut className="text-[1.4em]" />
-          <span>Logout</span>
-        </div>
       </div>
     </div>
   );
