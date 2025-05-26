@@ -23,7 +23,7 @@ import { IoFilter } from "react-icons/io5";
 const ZoneFilter = ({ alertType }) => {
   const [allTypes, setAllTypes] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [selectedType, setSelectedType] = useState("all");
+  const [selectedType, setSelectedType] = useState("");
   const [error, setError] = useState(null);
 
   useEffect(() => {
@@ -53,7 +53,7 @@ const ZoneFilter = ({ alertType }) => {
     >
       <button
         onClick={() => setShowDropdown((prev) => !prev)}
-        className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded hover:bg-gray-100 shadow-sm"
+        className="flex items-center justify-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded hover:bg-gray-100 shadow-sm"
       >
         <IoFilter size={20} />
         <span className="text-sm">
@@ -71,7 +71,7 @@ const ZoneFilter = ({ alertType }) => {
           </div>
           {allTypes.map((type) => (
             <div
-              key={type.id}
+              key={type.name}
               onClick={() => handleSelect(type.name)}
               className="cursor-pointer hover:bg-gray-100 px-3 py-2 rounded"
             >
@@ -427,10 +427,6 @@ const DrawMap = () => {
 
   const [assignAlert, setAssignAlert] = useState(false);
 
-  //get predefined zones from the endpoint once this copo mounts
-
-  const [predefinedZones, setPredefinedZones] = useState([]);
-
   const [zoneCreatedFlag, setZoneCreatedFlag] = useState(false);
 
   const notifyZoneCreated = () => {
@@ -478,7 +474,7 @@ const DrawMap = () => {
     }
   };
 
-  const [alertType, setAlertType] = useState("all");
+  const [alertType, setAlertType] = useState("");
 
   return (
     <div className="relative w-full h-[700px]">
@@ -557,6 +553,7 @@ const DrawMap = () => {
             selectedZone={selectedZone}
             setSelectedZone={setSelectedZone}
             zoneCreatedFlag={zoneCreatedFlag}
+            type={alertType}
           />
 
           {step === "zone creation" && (
