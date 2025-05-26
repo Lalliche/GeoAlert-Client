@@ -11,6 +11,8 @@ import { getAlerts, deleteAlert } from "@/api/alertApi";
 import Spinner from "@/Components/Global/Spinner";
 import { MdOutlineEdit, MdOutlineDeleteOutline } from "react-icons/md";
 import StatusMessage from "@/Components/Global/StatusMessage";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 const formatDate = (date) => {
   const dateObj = new Date(date);
@@ -94,7 +96,9 @@ const rowStructure = [
   {
     field: "type",
     width: "w-[9%]",
-    content: (value) => <p className="text-txt capitalize">{value}</p>,
+    content: (value) => (
+      <p className="text-txt line-clamp-1 capitalize">{value}</p>
+    ),
   },
   {
     field: "severity",
@@ -202,7 +206,7 @@ export default function Home() {
           date: item.StartDate,
           startDate: item.StartDate,
           endDate: item.EndDate,
-          frequency: `${Number((item.frequency / 60).toFixed(2))}min`,
+          frequency: `${item.frequency}sec`,
           zone: item.ZoneSelected,
           type: item.type,
           severity: item.gravity,
@@ -250,8 +254,8 @@ export default function Home() {
         }}
       />
       {loading ? (
-        <div className="center w-full h-[60vh]">
-          <Spinner />
+        <div className="w-full flex flex-col">
+          <Skeleton height={600} className="rounded-[0.6em]" />
         </div>
       ) : fetchError ? (
         <p className="text-red-500">{fetchError}</p>
