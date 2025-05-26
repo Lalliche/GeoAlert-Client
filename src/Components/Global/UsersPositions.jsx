@@ -38,17 +38,23 @@ const UsersTable = ({ users }) => {
           {
             field: "name",
             width: "w-[33%]",
-            content: (value) => <p className="text-txt">{value}</p>,
+            content: (value) => (
+              <p className="line-clamp-1 text-txt">{value}</p>
+            ),
           },
           {
             field: "phoneNumber",
             width: "w-[33%]",
-            content: (value) => <p className="text-txt">{value}</p>,
+            content: (value) => (
+              <p className=" line-clamp-1 text-txt">{value}</p>
+            ),
           },
           {
             field: "email",
             width: "w-[33%]",
-            content: (value) => <p className="text-txt">{value}</p>,
+            content: (value) => (
+              <p className="line-clamp-1 text-txt">{value}</p>
+            ),
           },
         ]}
         rowData={rowData}
