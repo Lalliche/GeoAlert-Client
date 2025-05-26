@@ -10,7 +10,7 @@ const PieChartComponent = dynamic(
   { ssr: false }
 );
 
-const AppUsers = dynamic(() => import("@/Components/Global/AppUsers"), {
+const AppUsers = dynamic(() => import("@/Components/Statistics/AppUsers"), {
   ssr: false,
 });
 
