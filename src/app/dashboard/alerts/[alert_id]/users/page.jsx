@@ -9,7 +9,11 @@ import { GrContactInfo } from "react-icons/gr";
 import { TfiLocationPin } from "react-icons/tfi";
 import StatusMessage from "@/Components/Global/StatusMessage";
 import { impactedUsers } from "@/api/notificationApi";
-
+import dynamic from "next/dynamic";
+const AlertAnalytics = dynamic(
+  () => import("@/Components/Statistics/AlertAnalytics"),
+  { ssr: false }
+);
 import Link from "next/link";
 import DataTable from "@/Components/Table/DataTable";
 
@@ -255,18 +259,23 @@ const AlertDetailsPage = () => {
           </p>
         </div>
       ) : (
-        <div className="flex flex-col border-2 border-[#D0D5DD] rounded-lg p-4">
-          <DataTable
-            initialFontSize="12px"
-            headers={headers}
-            rowStructure={rowStructure}
-            rowData={rowDataa}
-            onClickContent={[]}
-            rowClass={""}
-            TableClass={"!border-2 !border-transparent"}
-            TableText={"Impacted Users"}
-          />
-        </div>
+        <>
+          <div className="flex flex-col border-2 border-[#D0D5DD] rounded-lg p-4">
+            <DataTable
+              initialFontSize="12px"
+              headers={headers}
+              rowStructure={rowStructure}
+              rowData={rowDataa}
+              onClickContent={[]}
+              rowClass={""}
+              TableClass={"!border-2 !border-transparent"}
+              TableText={"Impacted Users"}
+            />
+          </div>
+          <div>
+            <AlertAnalytics />
+          </div>
+        </>
       )}
     </div>
   );
