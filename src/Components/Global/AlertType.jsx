@@ -181,12 +181,12 @@ const AlertType = ({ success, error, loading }) => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-8 gap-4">
+                  <div className="grid grid-cols-12 gap-4">
                     {Object.entries(icons).map(([name, IconComponent]) => (
                       <button
                         key={name}
                         onClick={() => setSelectedIconName(name)}
-                        className={`p-2 flex justify-center items-center rounded text-2xl hover:bg-gray-200 transition ${
+                        className={`p-2 flex justify-center items-center rounded text-2xl btn-shadow hover:bg-gray-200 transition ${
                           selectedIconName === name
                             ? "bg-blue-100 border-blue-500"
                             : ""
