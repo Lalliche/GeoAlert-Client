@@ -49,4 +49,9 @@ export const icons = {
   IoAlertCircle: <IoAlertCircle />,
   RiAlertFill: <RiAlertFill />,
   AiFillAlert: <AiFillAlert />,
+  FaFireFlameSimple: <FaFireFlameSimple />,
+  FaVirusCovid: <FaVirusCovid />,
+  GiPistolGun: <GiPistolGun />,
+  MdFlood: <MdFlood />,
+  FaMapMarkerAlt: <FaMapMarkerAlt />, // added here as fallback/default
 };
