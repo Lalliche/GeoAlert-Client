@@ -233,6 +233,7 @@ const AssigningAlert = ({
         <label className="text-sm font-semibold">Start Date & Time</label>
         <DatePicker
           selected={startDateTime}
+          timeIntervals={1}
           onChange={(date) => {
             setStartDateTime(date);
             setError(null);
@@ -250,6 +251,7 @@ const AssigningAlert = ({
         </label>
         <DatePicker
           selected={endDateTime}
+          timeIntervals={1}
           onChange={(date) => {
             console.log("End date selected:", date);
             if (startDateTime && date < startDateTime) {
