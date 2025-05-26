@@ -28,7 +28,7 @@ const Row = ({ text, icon }) => {
 
 const Page = () => {
   const router = useRouter();
-  // Use `useField` for email input
+  // Use useField for email input
   const emailField = useField("", (value) => emailPattern.test(value));
   const passwordField = useField("", (value) => passwordPattern.test(value));
   const [err, setErr] = useState("");
@@ -109,20 +109,25 @@ const Page = () => {
       </div>
 
       <div className="page-col !w-1/2  px-[5em] gap-[1.5em] h-full  ">
-        <div className="row gap-[1em] ">
-          <p className="">LOGO</p>
-          <p className="text-txt font-bold text-[1.75em] font-titillium-web ">
-            GeoAlert
-          </p>
+        <div className="row gap-[1em]">
+          <div className="">
+            <Image src="/login_bg.PNG" alt="" width={90} height={90} />
+          </div>
+          <div className=" flex flex-col justify-center items-center ">
+            <div>
+              <p className="text-txt font-bold text-[1.75em] font-titillium-web ">
+                GeoAlert
+              </p>
+            </div>
+            <p className="text-txt font-[600] text-[1.75em] font-titillium-web  ">
+              Welcome Back
+            </p>
+            <p className="text-txt  text-[1em] font-titillium-web  ">
+              Log in to access your account
+            </p>
+          </div>
         </div>
-        <div className="col gap-[0.5em]">
-          <p className="text-txt font-[600] text-[1.75em] font-titillium-web  ">
-            Welcome Back
-          </p>
-          <p className="text-txt  text-[1em] font-titillium-web  ">
-            Log in to access your account
-          </p>
-        </div>
+
         <div className="col gap-[1em] w-full ">
           <InputField
             label="Email"
