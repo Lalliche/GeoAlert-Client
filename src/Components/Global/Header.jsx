@@ -5,6 +5,7 @@ import { FaRegUser } from "react-icons/fa";
 import { MdKeyboardArrowDown } from "react-icons/md";
 import Cookies from "js-cookie";
 import { useRouter } from "next/navigation";
+import { FiLogOut } from "react-icons/fi";
 
 const Header = () => {
   const router = useRouter();
@@ -44,25 +45,14 @@ const Header = () => {
       {/* Right Side - Profile */}
       <div className="flex items-center gap-[1.5em]">
         {/* Profile Image */}
-        <div className="h-[2em] w-[2em] relative flex-shrink-0 rounded-full flex items-center justify-center cursor-pointer overflow-hidden">
-          {tempImage || !adminImage || imageError ? (
-            <FaRegUser className="text-[#718EBF] w-[80%] h-[80%]" />
-          ) : (
-            <Image
-              src={adminImage}
-              alt="Admin Picture"
-              layout="fill"
-              objectFit="cover"
-              className="rounded-full"
-              onError={() => setImageError(true)}
-            />
-          )}
-        </div>
 
         {/* Admin Name & Dropdown Icon */}
-        <div className="flex items-center gap-[0.5em] cursor-pointer">
-          <p className="text-[1em] text-txt  "> {adminName}</p>
-          <MdKeyboardArrowDown className="text-[1.5em] text-[#A9A9A9]" />
+        <div
+          className="flex flex-row items-center gap-3 p-3 mt-auto cursor-pointer text-[#7A7A7A] hover:text-red-500 hover:bg-[#F5F5F5] rounded-md transition-all"
+          onClick={handleLogout}
+        >
+          <FiLogOut className="text-[1.4em]" />
+          <span>Logout</span>
         </div>
       </div>
     </header>
