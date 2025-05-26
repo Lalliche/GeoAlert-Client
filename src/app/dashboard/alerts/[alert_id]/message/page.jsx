@@ -1,29 +1,40 @@
 "use client";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { FiArrowLeft } from "react-icons/fi";
 import { IoSaveOutline } from "react-icons/io5";
 import { GrFormEdit } from "react-icons/gr";
 import StatusMessage from "@/Components/Global/StatusMessage";
 import { updateAlert } from "@/api/alertApi";
 
+// 🧩 Helper component to read and set initial message
+const MessageParamLoader = ({ setMessage }) => {
+  const searchParams = useSearchParams();
+  const messageFromParam = searchParams.get("message") || "";
+
+  useEffect(() => {
+    setMessage(messageFromParam);
+  }, [messageFromParam, setMessage]);
+
+  return null;
+};
+
 export default function AlertMessagePage() {
   const { alert_id } = useParams();
-  useEffect(() => {
-    console.log("id from params:", alert_id);
-  }, [alert_id]);
-
-  const searchParams = useSearchParams();
   const router = useRouter();
 
-  const initialMessage = searchParams.get("message") || "";
   const [isEditing, setIsEditing] = useState(false);
-  const [message, setMessage] = useState(initialMessage);
+  const [message, setMessage] = useState(""); // Will be set via helper
+  const [initialMessage, setInitialMessage] = useState("");
 
   const [err, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [info, setInfo] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    setInitialMessage(message); // Sync initial message only once after load
+  }, [message]);
 
   const handleSave = async () => {
     if (message === initialMessage) {
@@ -38,6 +49,7 @@ export default function AlertMessagePage() {
 
       setSuccess("Alert updated successfully!");
       setIsEditing(false);
+      setInitialMessage(message); // Sync after saving
     } catch (error) {
       setError("Failed to update alert.");
     } finally {
@@ -65,7 +77,7 @@ export default function AlertMessagePage() {
         <span>/</span>
         <span>Alerts list</span>
         <span>/</span>
-        <span>Alert{alert_id}</span>
+        <span>Alert {alert_id}</span>
         <span>/</span>
         <span>Message</span>
       </div>
@@ -111,11 +123,16 @@ export default function AlertMessagePage() {
               className="btn-primary flex items-center justify-center gap-2 w-full py-2 hover:bg-gray-50 transition-colors shadow-[0_2px_8px_rgba(0,0,0,0.1)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.15)]"
             >
               <IoSaveOutline className="text-white" />
-              <span className="text-sm font-medium text-white  ">Save</span>
+              <span className="text-sm font-medium text-white">Save</span>
             </button>
           )}
         </div>
       </div>
+
+      {/* Suspense-wrapped search param reader */}
+      <Suspense fallback={null}>
+        <MessageParamLoader setMessage={setMessage} />
+      </Suspense>
     </div>
   );
 }
