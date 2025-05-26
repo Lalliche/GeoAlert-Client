@@ -22,9 +22,9 @@ export const impactedUsers = async (alertId) => {
   }
 };
 
-export const NotificationStats = async () => {
+export const NotificationStats = async (idAlert) => {
   try {
-    const response = await axios.get(`/stats/68333bf65e6c6ff6e89b82a2`, {
+    const response = await axios.get(`/stats/${idAlert}/`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
         "Content-Type": "application/json",
