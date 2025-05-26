@@ -1,5 +1,5 @@
 "use client";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import React, { useState } from "react";
 import { FiArrowLeft } from "react-icons/fi";
 import { MdAbc } from "react-icons/md";
