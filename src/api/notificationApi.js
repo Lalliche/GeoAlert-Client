@@ -39,3 +39,35 @@ export const NotificationStats = async (idAlert) => {
     throw error;
   }
 };
+
+export const GetNotificationCooldown = async () => {
+  try {
+    const response = await axios.get(`/cooldown/`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+    });
+    console.log("response in NotificationStatsByDate from server is", response); // Debugging line
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching notification stats by date:", error);
+    throw error;
+  }
+};
+
+export const putNotificationCooldown = async (cooldown) => {
+  try {
+    const response = await axios.put(`/cooldown/`, cooldown, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+    });
+    console.log("response in putNotificationCooldown from server is", response); // Debugging line
+    return response.data;
+  } catch (error) {
+    console.error("Error updating notification cooldown:", error);
+    throw error;
+  }
+};
