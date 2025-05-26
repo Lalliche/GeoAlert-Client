@@ -146,25 +146,6 @@ export default function ResponseDetailPage() {
             )}
           </div>
         )}
-
-        <div className="flex mb-10">
-          {classification && (
-            <div className="pr-5 rounded-lg inline-flex text-[12px] pt-15">
-              This response is classified as&nbsp;
-              <span
-                className={`${
-                  classification === "positive"
-                    ? "text-green-800"
-                    : "text-red-800"
-                }`}
-              >
-                {classification}
-              </span>
-              &nbsp;by ChatGPT
-              <img src="/chatgpt.svg" alt="ChatGPT" className="w-5 h-5 ml-2" />
-            </div>
-          )}
-        </div>
       </div>
     </div>
   );
