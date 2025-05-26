@@ -1,7 +1,5 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { useParams, usePathname } from "next/navigation";
-import Spinner from "@/Components/Global/Spinner";
 import { GrContactInfo } from "react-icons/gr";
 import { TfiLocationPin } from "react-icons/tfi";
 import { getAllUsers } from "@/api/authApi";
