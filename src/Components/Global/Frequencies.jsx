@@ -68,7 +68,7 @@ const Frequencies = ({ success, error, loading }) => {
       setUpdating(true);
       loading(true);
       await updateFrequency(name, parseInt(tempValue));
-      success(`${name} frequency updated.`);
+      success(` Parameter updated.`);
 
       if (name === "zone_fetch") {
         setZoneFreq(tempValue);
@@ -92,11 +92,11 @@ const Frequencies = ({ success, error, loading }) => {
   return (
     <div className="w-full">
       <div
-        className="border-2 border-[#D0D5DD] flex flex-col rounded-xl cursor-pointer select-none"
+        className="border-2 border-[#D0D5DD] font-space-grotesk flex flex-col rounded-xl cursor-pointer select-none"
         onClick={toggleDropdown}
       >
         <div className="flex items-center p-[1em] gap-[0.75em]">
-          <p className="text-txt font-semibold">Frequencies</p>
+          <p className="text-txt font-semibold">Parameters</p>
           <IoChevronForward
             className={`text-txt transform transition-transform duration-200 ${
               isOpen ? "rotate-90" : "rotate-0"
@@ -106,27 +106,36 @@ const Frequencies = ({ success, error, loading }) => {
 
         {isOpen && (
           <div
-            className="px-[1em] pb-[1em] flex flex-col gap-[1.5em]"
+            className="px-[1em] pb-[1em] flex flex-col "
             onClick={(e) => e.stopPropagation()}
           >
             {[
-              ["zone_fetch", "Zone Fetch", zoneFreq, setZoneFreq, hasZone],
+              [
+                "zone_fetch",
+                "Presence update interval",
+                "How often GeoAlert checks and updates the list of users in a zone.",
+                zoneFreq,
+                setZoneFreq,
+                hasZone,
+              ],
               [
                 "position_fetch",
-                "Position Fetch",
+                "Position update interval",
+                "How often GeoAlert checks and updates the users’ current location.",
                 positionFreq,
                 setPositionFreq,
                 hasPosition,
               ],
-            ].map(([name, label, value, setter, exists]) => (
+            ].map(([name, label, explanation, value, setter, exists]) => (
               <div
                 key={name}
-                className="w-full flex flex-col gap-[0.75em] px-[1em] py-[1em] rounded-xl border bg-[#F9FAFB]"
+                className="w-full flex flex-col gap-[0.75em] px-[1em] py-[1em] rounded-xl  "
               >
                 <label className="font-semibold text-txt">
                   {label} (seconds)
                 </label>
-                <div className="flex items-center gap-4">
+                <p className="text-xs text-txt">{explanation}</p>
+                <div className="flex  w-full items-center gap-4">
                   <input
                     type="text"
                     value={editing === name ? tempValue : value}
@@ -136,20 +145,20 @@ const Frequencies = ({ success, error, loading }) => {
                         : setter(e.target.value)
                     }
                     disabled={editing !== name && updating}
-                    className="border border-[#D0D5DD] rounded-lg px-4 py-2 w-32"
+                    className=" border border-[#D0D5DD] rounded-lg px-4 py-2 w-full"
                   />
                   {editing === name ? (
                     <>
                       <button
                         onClick={() => handleConfirmUpdate(name)}
-                        className="bg-green-600 text-white px-4 py-2 rounded hover:scale-105 transition-all duration-200 flex items-center gap-2"
+                        className="bg-main text-white px-4 py-2 rounded hover:scale-105 transition-all duration-200 flex items-center gap-2"
                       >
                         <FaCheck className="text-[1.25em]" />
                         Confirm
                       </button>
                       <button
                         onClick={handleCancelEdit}
-                        className="bg-red-600 text-white px-4 py-2 rounded hover:scale-105 transition-all duration-200 flex items-center gap-2"
+                        className="btn-shadow text-txt px-4 py-2 rounded hover:scale-105 transition-all duration-200 flex items-center gap-2"
                       >
                         <RxCross2 className="text-[1.25em]" />
                         Cancel
@@ -160,7 +169,6 @@ const Frequencies = ({ success, error, loading }) => {
                       onClick={() => handleStartEdit(name, value)}
                       className="bg-main text-white px-4 py-2 rounded hover:scale-105 transition-all duration-200 flex items-center gap-2"
                     >
-                      <FaCheck className="text-[1.25em]" />
                       {exists ? "Update" : "Add"}
                     </button>
                   )}
