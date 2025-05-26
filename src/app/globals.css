@@ -199,6 +199,22 @@ html {
   animation: pulse 1.5s infinite;
 }
 
+/* Override for react-datepicker to align calendar and time picker side by side */
+.react-datepicker {
+  display: flex !important;
+  flex-direction: row !important;
+}
+
+/* Optional: Control widths for better layout */
+.react-datepicker__time-container {
+  width: auto !important;
+  min-width: 80px;
+}
+
+.react-datepicker__time {
+  width: 100%;
+}
+
 @keyframes pulse {
   0% {
     transform: scale(1);
