@@ -150,6 +150,30 @@ html {
   outline: none;
 }
 
+.inputContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: row;
+  position: relative;
+  border-radius: 8px;
+  gap: 12px;
+  font-size: 16px;
+  border: none;
+}
+
+.invalidInputContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: row;
+  position: relative;
+  border: 2px solid red;
+  border-radius: 8px;
+  gap: 12px;
+  font-size: 16px;
+}
+
 .btn-primary {
   @apply bg-[#dc091a] text-white font-medium text-[1em] py-[0.625em] rounded-md 
          flex justify-center items-center cursor-pointer 
