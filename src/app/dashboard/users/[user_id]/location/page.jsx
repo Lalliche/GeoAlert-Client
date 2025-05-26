@@ -1,27 +1,40 @@
 "use client";
-import React, { useEffect, useState } from "react";
+
+import React, { useEffect, useState, Suspense } from "react";
 import dynamic from "next/dynamic";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import { FiArrowLeft } from "react-icons/fi";
 import Link from "next/link";
 import { getUserTracking } from "@/api/zonesApi"; // adjust path
+import { useSearchParams } from "next/navigation";
 
 const Position = dynamic(() => import("@/Components/Global/Position"), {
   ssr: false,
   loading: () => <p>Loading map...</p>,
 });
 
+// Helper component to read search param and pass to parent
+function DurationReader({ setDuration }) {
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    const duration = searchParams.get("duration");
+    setDuration(duration);
+  }, [searchParams, setDuration]);
+  return null;
+}
+
 export default function CurrentLocation() {
   const params = useParams();
   const userId = params.user_id;
-  const searchParams = useSearchParams();
-  const duration = searchParams.get("duration");
 
+  const [duration, setDuration] = useState(null);
   const [coordinates, setCoordinates] = useState([]);
   const [noData, setNoData] = useState(false);
 
   useEffect(() => {
     const fetchTrackingData = async () => {
+      if (!userId || !duration) return;
+
       try {
         const data = await getUserTracking(userId, duration);
 
@@ -30,7 +43,6 @@ export default function CurrentLocation() {
           return;
         }
 
-        // Extract and flatten all coordinates
         const allCoords = data.flatMap((entry) =>
           entry.position.map((p) => [p.latitude, p.longitude])
         );
@@ -53,7 +65,7 @@ export default function CurrentLocation() {
         <div className="flex items-center gap-1 text-sm pb-3">
           <span>Users</span>
           <span>/</span>
-          <span>User {userId}</span>
+          <span>{username}</span>
           <span>/</span>
           <span className="font-medium">Location</span>
         </div>
@@ -76,6 +88,10 @@ export default function CurrentLocation() {
           )}
         </div>
       </div>
+
+      <Suspense fallback={null}>
+        <DurationReader setDuration={setDuration} />
+      </Suspense>
     </div>
   );
 }
