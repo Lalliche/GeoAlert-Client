@@ -144,6 +144,16 @@ const Frequencies = ({ success, error, loading }) => {
         return;
       }
 
+      if (
+        !(
+          parsed.cooldown_severe < parsed.cooldown_moderate &&
+          parsed.cooldown_moderate < parsed.cooldown_minor
+        )
+      ) {
+        error("Cooldowns must follow: severe < moderate < minor.");
+        return;
+      }
+
       loading(true);
       await putNotificationCooldown(parsed);
       setCooldown({
