@@ -33,6 +33,7 @@ const PredefinedZones = ({
   selectedZone,
   setSelectedZone,
   zoneCreatedFlag,
+  type,
 }) => {
   const map = useMap();
 
@@ -42,13 +43,21 @@ const PredefinedZones = ({
     const fetchZones = async () => {
       try {
         const response = await getZones();
-        const zones = response;
+        let zones = response;
 
         console.log("Fetched zones:", zones);
 
+        // Filter based on 'type'
+        if (type && type !== "all") {
+          zones = zones.filter(
+            (zone) =>
+              zone?.alertType?.name?.toLowerCase() === type.toLowerCase()
+          );
+        }
+
         const formattedZones = zones.map((zone) => ({
           name: zone.name || "Unnamed Zone",
-          riskLevel: zone?.gravity, // or derive if available
+          riskLevel: zone?.gravity,
           coordinates: zone.coordinates.map((coord) => [
             coord.latitude,
             coord.longitude,
@@ -56,7 +65,7 @@ const PredefinedZones = ({
           type: zone?.isActive ? zone?.alertType?.name || null : null,
           icon: zone?.isActive ? zone?.alertType?.icon || null : null,
           color: getZoneColor(zone),
-          hasAlert: zone?.isActive, // adjust based on actual field
+          hasAlert: zone?.isActive,
           id: zone?._id || null,
         }));
 
@@ -68,7 +77,8 @@ const PredefinedZones = ({
     };
 
     fetchZones();
-  }, [zoneCreatedFlag]);
+    console.log("fetching zones the type is", type);
+  }, [zoneCreatedFlag, type]);
 
   // Render the marker for each zone
 
