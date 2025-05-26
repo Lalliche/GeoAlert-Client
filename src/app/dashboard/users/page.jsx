@@ -7,6 +7,8 @@ import { TfiLocationPin } from "react-icons/tfi";
 import { getAllUsers } from "@/api/authApi";
 import Link from "next/link";
 import DataTable from "@/Components/Table/DataTable";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 const formatDate = (dateString) => {
   const date = new Date(dateString);
@@ -106,7 +108,7 @@ const getRowStructure = (duration) => [
 ];
 
 const UsersPage = () => {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [users, setUsers] = useState([]);
 
@@ -152,8 +154,8 @@ const UsersPage = () => {
   return (
     <div className="w-full p-[3em] py-[1em] flex flex-col gap-[2em] relative">
       {loading ? (
-        <div className="center h-screen w-full">
-          <Spinner />
+        <div className="w-full flex flex-col">
+          <Skeleton height={600} className="rounded-[0.6em]" />
         </div>
       ) : error ? (
         <div className="text-red-500 font-semibold text-center">
