@@ -1,20 +1,32 @@
 "use client";
-import { useParams, useSearchParams } from "next/navigation";
+
+import { useParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { FiArrowLeft } from "react-icons/fi";
 import { LuAudioLines } from "react-icons/lu";
 import Cookies from "js-cookie";
 import axios from "axios";
 
-export default function ResponseDetailPage() {
-  const params = useParams();
+// Helper to extract searchParams
+function ClassificationReader({ setClassification }) {
   const searchParams = useSearchParams();
 
+  useEffect(() => {
+    const classification = searchParams.get("classification");
+    setClassification(classification);
+  }, [searchParams, setClassification]);
+
+  return null;
+}
+
+export default function ResponseDetailPage() {
+  const params = useParams();
   const alertId = params.alert_id;
   const userId = params.userId;
-  const classification = searchParams.get("classification");
 
+  const [classification, setClassification] = useState(null);
   const [reply, setReply] = useState(null);
   const [audioSrc, setAudioSrc] = useState(null);
 
@@ -39,7 +51,6 @@ export default function ResponseDetailPage() {
               },
             })
             .then((res) => {
-              console.log("Fetched audio blob:", res.data);
               const blobUrl = URL.createObjectURL(res.data);
               setAudioSrc(blobUrl);
             })
@@ -65,6 +76,7 @@ export default function ResponseDetailPage() {
 
   return (
     <div className="px-18 py-4 mx-auto">
+      {/* Breadcrumb */}
       <div className="flex items-center gap-1 text-sm pb-3">
         <span>Alerts</span>
         <span>/</span>
@@ -79,6 +91,7 @@ export default function ResponseDetailPage() {
         <span className="font-medium">Response</span>
       </div>
 
+      {/* Back link */}
       <Link
         href={`/dashboard/alerts/${alertId}/users`}
         className="flex items-center gap-2 pb-4 cursor-default"
@@ -87,18 +100,15 @@ export default function ResponseDetailPage() {
         <span>Back</span>
       </Link>
 
+      {/* Reply box */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
-        {/* Handle no response */}
-        {!reply && (
+        {!reply ? (
           <div className="text-center text-[#7A7A7A] text-[15px]">
             No response.
           </div>
-        )}
-
-        {/* If reply exists */}
-        {reply && (
+        ) : (
           <div className="flex flex-col gap-[2em]">
-            {/* Text part */}
+            {/* Text */}
             {(reply.type === "text" ||
               (reply.type === "audio" && reply.content)) && (
               <div>
@@ -110,7 +120,7 @@ export default function ResponseDetailPage() {
                       className="w-full h-full object-contain"
                     />
                   </div>
-                  <h1 className="text-xl font-bold pt-1 ">Text response</h1>
+                  <h1 className="text-xl font-bold pt-1">Text response</h1>
                 </div>
                 <div className="whitespace-pre-wrap break-words bg-[#C4C4C433] p-4 rounded-xl text-[#7A7A7A] text-[15px]">
                   {reply.content || "No text response."}
@@ -118,12 +128,12 @@ export default function ResponseDetailPage() {
               </div>
             )}
 
-            {/* Audio part */}
+            {/* Audio */}
             {(reply.type === "audio" ||
               (reply.type === "audio" && reply.content)) &&
               audioSrc && (
                 <div>
-                  <div className="flex items-center gap-2 mb-2  text-lg font-semibold">
+                  <div className="flex items-center gap-2 mb-2 text-lg font-semibold">
                     <LuAudioLines className="text-main" />
                     <span>Vocal response</span>
                   </div>
@@ -138,7 +148,7 @@ export default function ResponseDetailPage() {
                 </div>
               )}
 
-            {/* If type is text only and no audioSrc */}
+            {/* Text fallback */}
             {reply.type === "text" && !reply.content && (
               <div className="text-[#7A7A7A] text-[15px]">
                 No text response.
@@ -147,6 +157,10 @@ export default function ResponseDetailPage() {
           </div>
         )}
       </div>
+
+      <Suspense fallback={null}>
+        <ClassificationReader setClassification={setClassification} />
+      </Suspense>
     </div>
   );
 }
