@@ -92,7 +92,7 @@ const AppUsers = () => {
 
       console.log("Fetched users:", users);
 
-      const counts = {};
+      /* const counts = {};
       users.forEach((user) => {
         const key = new Date(user.createdAt).toISOString().split("T")[0];
         counts[key] = (counts[key] || 0) + 1;
@@ -102,6 +102,19 @@ const AppUsers = () => {
       let total = 0;
       const dataPoints = dateArray.map((d) => {
         const key = d.toISOString().split("T")[0];
+        total += counts[key] || 0;
+        return total;
+      }); */
+      const counts = {};
+      users.forEach((user) => {
+        const key = dayjs(user.createdAt).format("YYYY-MM-DD");
+        counts[key] = (counts[key] || 0) + 1;
+      });
+
+      const dateArray = generateDateArray(startISO, endISO);
+      let total = 0;
+      const dataPoints = dateArray.map((d) => {
+        const key = dayjs(d).format("YYYY-MM-DD");
         total += counts[key] || 0;
         return total;
       });
@@ -125,7 +138,9 @@ const AppUsers = () => {
 
       setChartData({
         labels: labelDates(dateArray),
-        dates: dateArray.map((d) => d.toISOString().split("T")[0]), // store full ISO dates
+        // dates: dateArray.map((d) => d.toISOString().split("T")[0]),
+        dates: dateArray.map((d) => dayjs(d).format("YYYY-MM-DD")),
+
         datasets: [
           {
             label: "Total Users",
