@@ -1,15 +1,32 @@
 "use client";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+
+import { useParams, useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import { FiArrowLeft, FiPhone } from "react-icons/fi";
 import { AiOutlineMail } from "react-icons/ai";
+import { useSearchParams } from "next/navigation";
+
+// Helper to extract search params
+function ContactInfoReader({ setPhone, setEmail }) {
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const phone = searchParams.get("phone");
+    const email = searchParams.get("email");
+
+    setPhone(phone);
+    setEmail(email);
+  }, [searchParams, setPhone, setEmail]);
+
+  return null;
+}
 
 export default function ContactInfoPage() {
   const { user_id } = useParams();
-  const searchParams = useSearchParams();
   const router = useRouter();
 
-  const phone = searchParams.get("phone");
-  const email = searchParams.get("email");
+  const [phone, setPhone] = useState(null);
+  const [email, setEmail] = useState(null);
 
   return (
     <div className="px-18 py-4 mx-auto">
@@ -54,6 +71,10 @@ export default function ContactInfoPage() {
           </div>
         </div>
       </div>
+
+      <Suspense fallback={null}>
+        <ContactInfoReader setPhone={setPhone} setEmail={setEmail} />
+      </Suspense>
     </div>
   );
 }
