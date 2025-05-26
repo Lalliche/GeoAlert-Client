@@ -45,21 +45,28 @@ const headers = [
     id: "contact",
     name: "Contact Info",
     field: "contact",
-    width: "w-[20%]",
+    width: "w-[15%]",
+    sortable: false,
+  },
+  {
+    id: "notification_count",
+    name: "Notification Count",
+    field: "notification_count",
+    width: "w-[15%]",
     sortable: false,
   },
   {
     id: "currentposition",
     name: "Current Position",
     field: "current_position",
-    width: "w-[20%]",
+    width: "w-[15%]",
     sortable: false,
   },
   {
     id: "response",
     name: "Response",
     field: "response",
-    width: "w-[20%]",
+    width: "w-[15%]",
     sortable: false,
   },
   {
@@ -78,7 +85,7 @@ const rowStructure = [
   },
   {
     field: "contact",
-    width: "w-[20%]",
+    width: "w-[15%]",
     content: (contactData, row) => {
       return (
         <Link
@@ -92,8 +99,19 @@ const rowStructure = [
     },
   },
   {
+    field: "notification_count",
+    width: "w-[15%]",
+    content: (value) => {
+      return (
+        <p className="text-txt center w-full ">
+          {value !== undefined && value !== null ? value : "N/A"}
+        </p>
+      );
+    },
+  },
+  {
     field: "current_position",
-    width: "w-[20%]",
+    width: "w-[15%]",
     content: (value, row) => {
       return (
         <Link
@@ -113,7 +131,7 @@ const rowStructure = [
   },
   {
     field: "response",
-    width: "w-[20%]",
+    width: "w-[15%]",
     content: (value) => getTypeContent(value),
   },
   {
@@ -168,7 +186,7 @@ const AlertDetailsPage = () => {
         const data = response?.data;
         console.log("Response data:", data); // Debugging line
 
-        const formatted = data?.map(({ user, reply }) => {
+        const formatted = data?.map(({ user, reply, notification_count }) => {
           let responseDetails = null;
           let response = "None";
 
@@ -193,6 +211,7 @@ const AlertDetailsPage = () => {
           return {
             id: user.id,
             alert_id,
+            notification_count,
             name: `${user.first_name} ${user.last_name}`,
             contact: {
               email: user.email,
