@@ -53,7 +53,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }) => {
 
       {/* Page Indicator */}
       {totalPages === 0 ? (
-        <p className="text-center text-[#344054] font-semibold">Aucune page</p>
+        <p className="text-center text-[#344054] font-semibold">No pages</p>
       ) : (
         <p className="ml-auto text-[#344054] font-semibold">
           {currentPage} of {totalPages}
