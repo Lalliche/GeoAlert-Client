@@ -26,7 +26,9 @@ ChartJS.register(
 
 import DateInput from "../Global/DateInput";
 import { IoMdAdd, IoMdRemove } from "react-icons/io";
-import dayjs from "dayjs"; // make sure to install dayjs if not already done
+import dayjs from "dayjs";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+dayjs.extend(isSameOrBefore);
 
 const AppUsers = () => {
   const chartRef = useRef(null);
@@ -49,18 +51,18 @@ const AppUsers = () => {
     return `${year}-${mm}-${dd}T00:00:00`;
   }; */
 
-  const formatToISODate = (date) => {
-    if (!date || !dayjs.isDayjs(date)) return null;
-    return date.startOf("day").toISOString();
-  };
+  const formatToISODate = (date) => dayjs(date).format("YYYY-MM-DDTHH:mm:ss");
 
   const generateDateArray = (start, end) => {
     const arr = [];
-    const date = new Date(start);
-    while (date <= new Date(end)) {
-      arr.push(new Date(date));
-      date.setDate(date.getDate() + 1);
+    let date = dayjs(start);
+
+    const endDate = dayjs(end);
+    while (date.isSameOrBefore(endDate, "day")) {
+      arr.push(date.toDate());
+      date = date.add(1, "day");
     }
+
     return arr;
   };
 
@@ -87,6 +89,8 @@ const AppUsers = () => {
   const fetchUsers = async (startISO, endISO) => {
     try {
       const users = await getUsersByDateRange(startISO, endISO);
+
+      console.log("Fetched users:", users);
 
       const counts = {};
       users.forEach((user) => {
@@ -133,6 +137,7 @@ const AppUsers = () => {
         ],
       });
     } catch (err) {
+      console.log("Error fetching users:", err);
       setError(
         err?.response?.data?.message === "No users found"
           ? "No users found for the selected date range."
@@ -146,8 +151,7 @@ const AppUsers = () => {
 
     const startISO = formatToISODate(startDate) || "2025-01-01T00:00:00";
     const endISO =
-      formatToISODate(endDate) ||
-      new Date().toISOString().split("T")[0] + "T00:00:00";
+      formatToISODate(endDate) || dayjs().format("YYYY-MM-DDTHH:mm:ss");
 
     if (new Date(endISO) <= new Date(startISO)) {
       setError("End date must be greater than start date.");
@@ -158,20 +162,12 @@ const AppUsers = () => {
   };
 
   useEffect(() => {
-    const today = dayjs(); // use dayjs instead of new Date()
-    setEndDate(today);
+    const today = dayjs();
+    setEndDate(today); // store the full current timestamp
 
-    fetchUsers("2025-01-01T00:00:00", today.startOf("day").toISOString());
+    const todayFormatted = today.format("YYYY-MM-DDTHH:mm:ss");
+    fetchUsers("2025-01-01T00:00:00", todayFormatted);
   }, []);
-
-  const inputStyle = {
-    padding: "6px 10px",
-    marginRight: "8px",
-    fontSize: "14px",
-    borderRadius: "4px",
-    border: "1px solid #ccc",
-    width: "70px",
-  };
 
   const [showStartDate, setShowStartDate] = useState(false);
   const [showEndDate, setShowEndDate] = useState(false);
