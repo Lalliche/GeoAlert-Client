@@ -6,6 +6,8 @@ import { MdErrorOutline } from "react-icons/md";
 import { getZones } from "@/api/zonesApi";
 import StatusMessage from "@/Components/Global/StatusMessage";
 import DataTable from "@/Components/Table/DataTable";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 // Animated green heartbeat dot
 const HeartBeatDot = () => (
@@ -124,8 +126,8 @@ const ZoneDash = () => {
       />
 
       {loading ? (
-        <div className="center h-screen w-full">
-          <Spinner />
+        <div className="w-full flex flex-col">
+          <Skeleton height={600} className="rounded-[0.6em]" />
         </div>
       ) : fetchError ? (
         <div className="center flex-col gap-4 h-full">
