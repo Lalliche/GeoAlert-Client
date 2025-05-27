@@ -156,7 +156,7 @@ const AppUsers = () => {
       setError(
         err?.response?.data?.message === "No users found"
           ? "No users found for the selected date range."
-          : "Failed to fetch users. See console."
+          : "No user found."
       );
     }
   };
