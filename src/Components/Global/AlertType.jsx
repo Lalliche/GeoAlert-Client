@@ -181,7 +181,7 @@ const AlertType = ({ success, error, loading }) => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-12 gap-4">
+                  <div className="grid grid-cols-8 gap-4">
                     {Object.entries(icons).map(([name, IconComponent]) => (
                       <button
                         key={name}
