@@ -138,15 +138,17 @@ const AlertType = ({ success, error, loading }) => {
 
             {/* Add Alert Type Button */}
             {!showAddForm && (
-              <div
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowAddForm(true);
-                }}
-                className="text-txt font-semibold flex items-center justify-center gap-2 cursor-pointer btn-shadow rounded-lg p-[1em] hover:scale-105  transition-all duration-200 "
-              >
-                <IoAddOutline className="text-[1.5em]" />
-                <p>Add Alert Type</p>
+              <div className="w-full center ] ">
+                <div
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowAddForm(true);
+                  }}
+                  className="text-txt w-[90%] font-semibold flex items-center justify-center gap-2 cursor-pointer btn-shadow rounded-lg p-[1em] hover:scale-105  transition-all duration-200 "
+                >
+                  <IoAddOutline className="text-[1.5em]" />
+                  <p>Add Alert Type</p>
+                </div>
               </div>
             )}
 

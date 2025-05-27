@@ -25,7 +25,7 @@ function ClassificationReader({ setClassification }) {
 export default function ResponseDetailPage() {
   const params = useParams();
   const alertId = params.alert_id;
-  const userId = params.userId;
+  const userId = params.user_id;
 
   const [classification, setClassification] = useState(null);
   const [reply, setReply] = useState(null);
@@ -182,6 +182,16 @@ export default function ResponseDetailPage() {
                 the AI model.
               </div>
             )}
+
+            {sentiment === "neutral" && (
+              <div className="text-[#7A7A7A] text-[15px]">
+                This response is classified as{" "}
+                <span className="text-yellow-600 font-medium">neutral</span> by
+                the AI model.
+              </div>
+            )}
+
+            {/* Classification */}
           </div>
         )}
       </div>

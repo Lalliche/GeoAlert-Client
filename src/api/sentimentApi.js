@@ -5,6 +5,7 @@ import Cookies from "js-cookie";
 const accessToken = Cookies.get("access");
 
 export const getAlertSentiment = async (alertId) => {
+  console.log("getAlertSentiment called with alertId:", alertId);
   try {
     const response = await axios.get(`/alert_sentiment/${alertId}/`, {
       headers: {

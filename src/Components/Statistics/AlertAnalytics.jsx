@@ -24,7 +24,7 @@ import { getAlertSentiment } from "@/api/sentimentApi";
 const AlertAnalytics = () => {
   const { alert_id } = useParams();
   const [stats, setStats] = useState(null);
-  const [Res, setRes] = useState([]);
+  const [Res, setRes] = useState(null);
   useEffect(() => {
     const fetchStats = async () => {
       try {
@@ -57,7 +57,6 @@ const AlertAnalytics = () => {
   }, [alert_id]);
 
   const [hovered, setHovered] = useState(null);
-  const source = Res[0] || stats;
 
   return (
     <div className="flex flex-col gap-[1em]   ">
@@ -153,10 +152,12 @@ const AlertAnalytics = () => {
                     }`}
                   >
                     {hovered === "positive"
-                      ? `${((source?.positive / source?.replies) * 100).toFixed(
-                          1
-                        )}%`
-                      : source?.positive}
+                      ? Res?.replies === 0
+                        ? "0%"
+                        : `${((Res?.positive / Res?.replies) * 100).toFixed(
+                            1
+                          )}%`
+                      : Res?.positive}
                   </h1>
                   <h3>Positive responses</h3>
                 </div>
@@ -183,10 +184,12 @@ const AlertAnalytics = () => {
                     }`}
                   >
                     {hovered === "negative"
-                      ? `${((source?.negative / source?.replies) * 100).toFixed(
-                          1
-                        )}%`
-                      : source?.negative}
+                      ? `${
+                          Res?.replies === 0
+                            ? "0"
+                            : ((Res?.negative / Res?.replies) * 100).toFixed(1)
+                        }%`
+                      : Res?.negative}
                   </h1>
                   <h3>Negative responses</h3>
                 </div>
