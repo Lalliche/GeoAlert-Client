@@ -8,6 +8,7 @@ import { FiArrowLeft } from "react-icons/fi";
 import { LuAudioLines } from "react-icons/lu";
 import Cookies from "js-cookie";
 import axios from "axios";
+import { getUserSentiment } from "@/api/sentimentApi";
 
 // Helper to extract searchParams
 function ClassificationReader({ setClassification }) {
@@ -29,6 +30,23 @@ export default function ResponseDetailPage() {
   const [classification, setClassification] = useState(null);
   const [reply, setReply] = useState(null);
   const [audioSrc, setAudioSrc] = useState(null);
+
+  const [sentiment, setSentiment] = useState(null);
+
+  useEffect(() => {
+    const fetchSentiment = async () => {
+      try {
+        const data = await getUserSentiment(userId);
+        console.log("getUserSentiment data:", data);
+        setSentiment(data);
+      } catch (error) {
+        console.error("Failed to fetch getUserSentiment:", error);
+      }
+    };
+    if (userId) {
+      fetchSentiment();
+    }
+  }, [userId]);
 
   useEffect(() => {
     const storedReply = localStorage.getItem("reply");
@@ -149,9 +167,19 @@ export default function ResponseDetailPage() {
               )}
 
             {/* Text fallback */}
-            {reply.type === "text" && !reply.content && (
+            {sentiment === "positive" && (
               <div className="text-[#7A7A7A] text-[15px]">
-                No text response.
+                This response is classified as{" "}
+                <span className="text-green-600 font-medium">positive</span> by
+                the AI model.
+              </div>
+            )}
+
+            {sentiment === "negative" && (
+              <div className="text-[#7A7A7A] text-[15px]">
+                This response is classified as{" "}
+                <span className="text-red-600 font-medium">negative</span> by
+                the AI model.
               </div>
             )}
           </div>
