@@ -26,7 +26,7 @@ const getRowData = (users) =>
     email: user.email,
   }));
 
-const UsersTable = ({ users }) => {
+const UsersTable = ({ users, user }) => {
   const rowData = getRowData(users);
 
   return (
@@ -59,6 +59,10 @@ const UsersTable = ({ users }) => {
         ]}
         rowData={rowData}
         onClickContent={[]}
+        onClickRow={(data) => {
+          user(data);
+          console.log("Selected user:", data);
+        }}
         rowClass={""}
         TableClass={"!border-2 !border-transparent"}
         TableText={"Users list"}
@@ -69,6 +73,7 @@ const UsersTable = ({ users }) => {
 
 const UserZoneMap = ({ users, coordinates, zone }) => {
   const [isClient, setIsClient] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   useEffect(() => {
     setIsClient(true);
@@ -124,25 +129,30 @@ const UserZoneMap = ({ users, coordinates, zone }) => {
           </Tooltip>
         </Polygon>
 
-        {users.map((user) => {
-          const pos = user.position?.[0];
-          if (!pos) return null;
-          const lat = parseFloat(pos.latitude);
-          const lng = parseFloat(pos.longitude);
-          if (isNaN(lat) || isNaN(lng)) return null;
+        {users
+          .filter((user) => {
+            if (!selectedUser) return true; // show all if no selected user
+            return user.email === selectedUser.email; // show only selected user if selectedUser exists
+          })
+          .map((user) => {
+            const pos = user.position?.[0];
+            if (!pos) return null;
+            const lat = parseFloat(pos.latitude);
+            const lng = parseFloat(pos.longitude);
+            if (isNaN(lat) || isNaN(lng)) return null;
 
-          return (
-            <Marker key={user.UserId} position={[lat, lng]}>
-              <Tooltip direction="top" offset={[0, -10]} opacity={1}>
-                <span>
-                  {user.firstName} {user.lastName} <br />
-                  Email: {user.email} <br />
-                  Phone: {user.phoneNumber}
-                </span>
-              </Tooltip>
-            </Marker>
-          );
-        })}
+            return (
+              <Marker key={user.UserId} position={[lat, lng]}>
+                <Tooltip direction="top" offset={[0, -10]} opacity={1}>
+                  <span>
+                    {user.firstName} {user.lastName} <br />
+                    Email: {user.email} <br />
+                    Phone: {user.phoneNumber}
+                  </span>
+                </Tooltip>
+              </Marker>
+            );
+          })}
       </MapContainer>
 
       {/* Table overlays on the right, 50% width of the map */}
@@ -160,7 +170,7 @@ const UserZoneMap = ({ users, coordinates, zone }) => {
           borderBottomLeftRadius: "0.5rem",
         }}
       >
-        <UsersTable users={users} />
+        <UsersTable users={users} user={setSelectedUser} />
       </div>
     </div>
   );

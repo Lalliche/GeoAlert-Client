@@ -11,13 +11,14 @@ const Row = ({
   setClickedRow = () => {},
 }) => {
   const handleClick = () => {
-    if (clickedRowId === data.id) {
-      // Row is already selected, so deselect it
+    const rowKey = data.id ?? data.email;
+    const clickedKey = clickedRowId;
+
+    if (clickedKey === rowKey) {
       handleRowClick(null);
       setClickedRow(null);
     } else {
-      // Select the new row
-      handleRowClick(data.id);
+      handleRowClick(rowKey);
       setClickedRow(data);
     }
   };
