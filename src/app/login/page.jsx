@@ -84,25 +84,22 @@ const Page = () => {
           <p className="text-txt text-[3em] font-bold font-titillium-web ">
             Navigate with Confidence.
           </p>
-          <p className="text-txt text-[3em] font-bold font-titillium-web ">
-            Another Slogan!
-          </p>
         </div>
         <div className="col w-full !items-start z-10 gap-[1em]  ">
           <Row
-            text="Advice number one, conseil numéro un, Ratschlag Nummer Eins."
+            text="This app helps you monitor alerts and notify impacted users in real time."
             icon={<MdOutlineTextSnippet />}
           />
           <Row
-            text="Advice number one, conseil numéro un, Ratschlag Nummer Eins."
+            text="Track user sentiment to understand how people react to specific alerts."
             icon={<MdOutlineTextSnippet />}
           />
           <Row
-            text="Advice number one, conseil numéro un, Ratschlag Nummer Eins."
+            text="Manage notification cooldowns to avoid spamming and maintain user trust."
             icon={<MdOutlineTextSnippet />}
           />
           <Row
-            text="Advice number one, conseil numéro un, Ratschlag Nummer Eins."
+            text="View detailed alert statistics to improve response efficiency and decision-making."
             icon={<MdOutlineTextSnippet />}
           />
         </div>
