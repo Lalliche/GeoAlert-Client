@@ -11,18 +11,20 @@ import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { LuTriangleAlert } from "react-icons/lu"; //for negative res
 import { IoShieldCheckmarkOutline } from "react-icons/io5"; // for positive res
+import { getAlertSentiment } from "@/api/sentimentApi";
 
-const Res = [
+/* const Res = [
   {
     positive: 2,
     negative: 2,
     replies: 4,
   },
-];
+]; */
 
 const AlertAnalytics = () => {
   const { alert_id } = useParams();
   const [stats, setStats] = useState(null);
+  const [Res, setRes] = useState([]);
   useEffect(() => {
     const fetchStats = async () => {
       try {
@@ -36,6 +38,21 @@ const AlertAnalytics = () => {
 
     if (alert_id) {
       fetchStats();
+    }
+  }, [alert_id]);
+
+  useEffect(() => {
+    const fetchSentiment = async () => {
+      try {
+        const data = await getAlertSentiment(alert_id);
+        console.log("getAlertSentiment data:", data);
+        setRes(data); // Save to state
+      } catch (error) {
+        console.error("Failed to fetch getAlertSentiment:", error);
+      }
+    };
+    if (alert_id) {
+      fetchSentiment();
     }
   }, [alert_id]);
 
@@ -136,10 +153,10 @@ const AlertAnalytics = () => {
                     }`}
                   >
                     {hovered === "positive"
-                      ? `${((source.positive / source.replies) * 100).toFixed(
+                      ? `${((source?.positive / source?.replies) * 100).toFixed(
                           1
                         )}%`
-                      : source.positive}
+                      : source?.positive}
                   </h1>
                   <h3>Positive responses</h3>
                 </div>
@@ -166,10 +183,10 @@ const AlertAnalytics = () => {
                     }`}
                   >
                     {hovered === "negative"
-                      ? `${((source.negative / source.replies) * 100).toFixed(
+                      ? `${((source?.negative / source?.replies) * 100).toFixed(
                           1
                         )}%`
-                      : source.negative}
+                      : source?.negative}
                   </h1>
                   <h3>Negative responses</h3>
                 </div>
