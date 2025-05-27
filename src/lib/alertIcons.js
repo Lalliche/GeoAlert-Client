@@ -6,13 +6,20 @@ import {
   FaGun,
   FaFireFlameSimple,
   FaVirusCovid,
+  FaPersonMilitaryRifle,
 } from "react-icons/fa6";
-import { FaMapMarkerAlt } from "react-icons/fa"; // ✅ correct
+import { FaMapMarkerAlt, FaFire } from "react-icons/fa"; // FaFire from fa6 added above, keep fallback if needed
 
 import { BsHurricane } from "react-icons/bs";
-import { GiWildfires, GiPistolGun } from "react-icons/gi";
-import { MdSevereCold, MdFlood } from "react-icons/md";
-import { IoIosNuclear } from "react-icons/io";
+import { GiWildfires, GiPistolGun, GiFireAxe } from "react-icons/gi";
+import {
+  MdSevereCold,
+  MdFlood,
+  MdBusAlert,
+  MdFireHydrantAlt,
+  MdForest,
+} from "react-icons/md";
+import { IoIosNuclear, IoIosAirplane } from "react-icons/io";
 import { IoAlertCircle } from "react-icons/io5";
 import { AiFillAlert } from "react-icons/ai";
 
@@ -34,6 +41,15 @@ export const iconComponents = {
   GiPistolGun: GiPistolGun,
   MdFlood: MdFlood,
   FaMapMarkerAlt: FaMapMarkerAlt, // default fallback icon
+
+  // New additions:
+  MdBusAlert: MdBusAlert,
+  FaFire: FaFire,
+  MdFireHydrantAlt: MdFireHydrantAlt,
+  GiFireAxe: GiFireAxe,
+  MdForest: MdForest,
+  IoIosAirplane: IoIosAirplane,
+  FaPersonMilitaryRifle: FaPersonMilitaryRifle,
 };
 
 export const icons = {
@@ -53,5 +69,14 @@ export const icons = {
   FaVirusCovid: <FaVirusCovid />,
   GiPistolGun: <GiPistolGun />,
   MdFlood: <MdFlood />,
-  FaMapMarkerAlt: <FaMapMarkerAlt />, // added here as fallback/default
+  FaMapMarkerAlt: <FaMapMarkerAlt />,
+
+  // New additions:
+  MdBusAlert: <MdBusAlert />,
+  FaFire: <FaFire />,
+  MdFireHydrantAlt: <MdFireHydrantAlt />,
+  GiFireAxe: <GiFireAxe />,
+  MdForest: <MdForest />,
+  IoIosAirplane: <IoIosAirplane />,
+  FaPersonMilitaryRifle: <FaPersonMilitaryRifle />,
 };
